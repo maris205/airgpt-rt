@@ -1,0 +1,30 @@
+# Octo 1.5 compatibility stack. Install the CUDA JAX wheel first:
+# pip install 'jax[cuda11_pip]==0.4.20' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+numpy==1.24.3
+scipy==1.11.4
+ml-dtypes==0.2.0
+jax==0.4.20
+flax==0.7.5
+orbax-checkpoint==0.4.4
+chex==0.1.85
+optax==0.1.5
+distrax==0.1.5
+tensorflow==2.15.0
+tensorflow-probability==0.23.0
+tensorflow-text==2.15.0
+tensorflow-hub==0.16.1
+tensorflow-datasets==4.9.2
+tensorflow-metadata==1.14.0
+array-record==0.4.1
+tensorflow-graphics==2021.12.3
+protobuf==3.20.3
+absl-py==1.4.0
+transformers==4.36.2
+tokenizers==0.15.2
+huggingface-hub==0.20.3
+einops==0.8.2
+gym==0.26.2
+ml-collections==1.1.0
+wandb==0.16.0
+dlimp @ git+https://github.com/kvablack/dlimp@5edaa4691567873d495633f2708982b42edf1972
+octo @ git+https://github.com/octo-models/octo@241fb3514b7c40957a86d869fecb7c7fc353f540

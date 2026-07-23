@@ -1,0 +1,31 @@
+models:
+  openvla:
+    type: vla
+    backend: mock
+    adapter: openvla
+    model_id: openvla/openvla-7b
+    device: cpu
+    metadata:
+      action_dim: 7
+      runtime_ready: false
+      verified_runtime: transformers
+  octo:
+    type: vla
+    backend: mock
+    adapter: octo
+    model_id: rail-berkeley/octo-small-1.5
+    device: cpu
+    metadata:
+      action_dim: 7
+      runtime_ready: false
+      verified_runtime: jax
+  ltx_video:
+    type: world
+    backend: mock
+    adapter: ltx_video
+    model_id: Lightricks/LTX-Video-0.9.5
+    device: cpu
+    metadata:
+      runtime_ready: false
+      verified_runtime: diffusers
+

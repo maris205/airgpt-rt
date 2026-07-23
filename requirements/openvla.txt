@@ -1,0 +1,13 @@
+# Official OpenVLA inference stack, isolated in the airgpt-openvla environment.
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.2.2+cu121
+torchvision==0.17.2+cu121
+numpy==1.26.4
+transformers==4.40.1
+tokenizers==0.19.1
+timm==0.9.10
+accelerate==0.30.1
+pillow==10.4.0
+safetensors==0.4.5
+psutil==6.1.1
+
