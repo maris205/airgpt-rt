@@ -9,7 +9,9 @@
   repeated-request stability, and unload verification.
 - M3 complete: LTX-Video Diffusers runtime passed artifact-backed GPU API and video
   decoding checks.
-- Next: M3.1/M4, a task-specific DreamerV3 state-space worker and Octo integration.
+- M3.1 complete: task-specific DreamerV3 CartPole state-space worker passed real
+  SDK/API rollout with a pinned checkpoint and reproducible Gym 0.26 patch.
+- Next: M4, Octo integration and simulator examples.
 
 ## 1. Goal and delivery scope
 
@@ -276,6 +278,9 @@ Exit criteria:
 - Simulator examples run against mock mode and are documented for real mode.
 
 ### M3.1 - DreamerV3 state-space worker (2-3 working days, task-specific)
+
+Status: **complete**. The implementation and measured exit criteria are documented in
+[`docs/M3_1_DREAMER.md`](docs/M3_1_DREAMER.md).
 
 Tasks:
 

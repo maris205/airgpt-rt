@@ -25,6 +25,8 @@ from .schemas import (
     ModelsResponse,
     RobotActionRequest,
     RobotActionResponse,
+    StatePredictRequest,
+    StatePredictResponse,
     WorldPredictRequest,
     WorldPredictResponse,
 )
@@ -161,6 +163,16 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
         try:
             return await asyncio.wait_for(
                 run_in_threadpool(manager.predict_world, request),
+                timeout=settings.inference_timeout_seconds,
+            )
+        except asyncio.TimeoutError as exc:
+            raise InferenceTimeoutError(settings.inference_timeout_seconds) from exc
+
+    @app.post("/v1/state/predict", response_model=StatePredictResponse)
+    async def state_predict(request: StatePredictRequest):
+        try:
+            return await asyncio.wait_for(
+                run_in_threadpool(manager.predict_state, request),
                 timeout=settings.inference_timeout_seconds,
             )
         except asyncio.TimeoutError as exc:

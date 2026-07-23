@@ -16,7 +16,7 @@ class ModelInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
-    type: Literal["vla", "world"]
+    type: Literal["vla", "world", "state_world"]
     backend: str
     adapter: str
     status: Literal["registered", "loading", "ready", "failed", "unloading"]
@@ -100,6 +100,34 @@ class WorldPredictRequest(BaseModel):
 class WorldPredictResponse(BaseModel):
     model: str
     frames: list[str]
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class StatePredictRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "model": "dreamer_cartpole",
+                "observation": [0.01, 0.02, 0.03, 0.04],
+                "actions": [0, 1, 0, 1, 0],
+                "seed": 0,
+            }
+        }
+    )
+
+    model: str = Field(min_length=1)
+    observation: list[float] = Field(min_length=1, max_length=4096)
+    actions: list[int | list[float]] = Field(min_length=1, max_length=100)
+    seed: int = Field(default=0, ge=0, le=2**31 - 1)
+    reset: bool = True
+
+
+class StatePredictResponse(BaseModel):
+    model: str
+    latent_states: list[list[float]]
+    predicted_observations: list[list[float]] = Field(default_factory=list)
+    predicted_rewards: list[float] = Field(default_factory=list)
+    uncertainty: list[float] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

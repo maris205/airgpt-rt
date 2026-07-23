@@ -5,6 +5,8 @@ from typing import Protocol
 from ..schemas import (
     RobotActionResponse,
     RobotActionRequest,
+    StatePredictRequest,
+    StatePredictResponse,
     WorldPredictRequest,
     WorldPredictResponse,
 )
@@ -24,3 +26,7 @@ class VLAAdapter(Runtime, Protocol):
 
 class WorldAdapter(Runtime, Protocol):
     def predict_world(self, request: WorldPredictRequest) -> WorldPredictResponse: ...
+
+
+class StateWorldAdapter(Runtime, Protocol):
+    def predict_state(self, request: StatePredictRequest) -> StatePredictResponse: ...

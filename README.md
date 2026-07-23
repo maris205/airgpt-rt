@@ -1,8 +1,9 @@
 # AirGPT Embodied AI Model Service
 
-Unified FastAPI service for VLA and world-model inference. Mock mode covers the full
-public contract without GPU access. Real mode currently supports OpenVLA and LTX-Video
-on CUDA in their isolated Conda environments.
+Unified FastAPI service for VLA, image/video world-model, and task-specific state-space
+inference. Mock mode covers the full public contract without GPU access. Real mode
+supports OpenVLA and LTX-Video on CUDA plus a DreamerV3 CartPole worker in an isolated
+CPU JAX environment.
 
 ## Start
 
@@ -38,6 +39,19 @@ Run the world worker on port `8001` so it can coexist with the OpenVLA worker:
 The response contains `/artifacts/...` URLs for individual frames and the generated
 MP4. The default artifact directory is `artifacts/runtime-world`.
 
+### DreamerV3 state-space mode
+
+Set up the pinned official source and run the CartPole state worker on port `8002`:
+
+```bash
+./scripts/setup_dreamer.sh
+./scripts/run_dreamer.sh
+./scripts/smoke_dreamer_api.sh
+```
+
+See [`docs/M3_1_DREAMER.md`](docs/M3_1_DREAMER.md) for the fixed observation/action
+contract and the task-specific checkpoint limitation.
+
 ## Test
 
 ```bash
@@ -55,6 +69,7 @@ ruff check src tests
 - `POST /v1/models/{model}/unload`
 - `POST /v1/robot/action`
 - `POST /v1/world/predict`
+- `POST /v1/state/predict`
 
 ## SDK
 
@@ -77,7 +92,8 @@ with Client("http://127.0.0.1:8000") as client:
 - Octo Small 1.5: M0 GPU probe passed; isolated JAX worker pending M4.
 - LTX-Video 0.9.5: Diffusers runtime and artifact-backed GPU API passed M3.
 - Cosmos: adapter boundary reserved; checkpoint access is currently gated.
-- DreamerV3: recommended follow-on state-space worker; see `docs/DREAMER_V3_EVALUATION.md`.
+- DreamerV3 CartPole: M3.1 state-space worker passed real SDK/API rollout; see
+  [`docs/M3_1_DREAMER.md`](docs/M3_1_DREAMER.md).
 
 AutoDL development uses native Conda environments. Docker artifacts will be validated
 on a host with Docker Engine and NVIDIA Container Toolkit.

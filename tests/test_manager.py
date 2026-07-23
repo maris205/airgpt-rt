@@ -59,6 +59,24 @@ def test_real_worker_mode_selects_ltx_runtime(monkeypatch, tmp_path):
     assert manager.get_model("ltx_video").runtime.loaded
 
 
+def test_real_worker_mode_selects_dreamer_runtime(monkeypatch):
+    class FakeRuntime:
+        def __init__(self, spec):
+            self.device = spec.device
+            self.loaded = False
+
+        def load(self):
+            self.loaded = True
+
+        def unload(self):
+            self.loaded = False
+
+    monkeypatch.setattr("airgpt_service.manager.DreamerV3StateRuntime", FakeRuntime)
+    manager = ModelManager(ModelRegistry(CONFIG), worker_mode="real")
+    assert manager.load("dreamer_cartpole").status == "ready"
+    assert manager.get_model("dreamer_cartpole").runtime.loaded
+
+
 def test_load_and_unload_are_idempotent():
     manager = ModelManager(ModelRegistry(CONFIG))
     first = manager.load("octo")

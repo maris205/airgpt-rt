@@ -1,0 +1,16 @@
+# CPU runtime pins for the task-specific DreamerV3 CartPole worker.
+# The official repository lists optional Atari/DMLab/Minecraft dependencies;
+# they are intentionally excluded from this first low-dimensional path.
+jax==0.4.33
+jaxlib==0.4.33
+numpy==1.26.4
+gym==0.26.2
+chex==0.1.90
+einops==0.8.2
+elements==3.22.0
+granular==0.23.1
+jaxtyping==0.3.11
+ninjax==3.6.3
+optax==0.2.5
+portal==3.8.1
+ruamel.yaml==0.19.1

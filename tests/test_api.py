@@ -8,12 +8,17 @@ def test_health_and_registered_models(client):
     assert client.get("/health/live").json() == {"status": "ok"}
     ready = client.get("/health/ready")
     assert ready.status_code == 200
-    assert ready.json() == {"status": "ok", "models": 3}
+    assert ready.json() == {"status": "ok", "models": 4}
 
     response = client.get("/v1/models")
     assert response.status_code == 200
     models = response.json()["models"]
-    assert [model["name"] for model in models] == ["openvla", "octo", "ltx_video"]
+    assert [model["name"] for model in models] == [
+        "openvla",
+        "octo",
+        "ltx_video",
+        "dreamer_cartpole",
+    ]
     assert all(model["status"] == "registered" for model in models)
 
 
@@ -95,3 +100,21 @@ def test_world_requires_conditioning_input(client):
     response = client.post("/v1/world/predict", json={"model": "ltx_video"})
     assert response.status_code == 422
     assert response.json()["code"] == "invalid_input"
+
+
+def test_state_prediction_contract(client):
+    response = client.post(
+        "/v1/state/predict",
+        json={
+            "model": "dreamer_cartpole",
+            "observation": [0.01, 0.02, 0.03, 0.04],
+            "actions": [0, 1, 0, 1],
+            "seed": 7,
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["model"] == "dreamer_cartpole"
+    assert len(body["latent_states"]) == 4
+    assert len(body["latent_states"][0]) == 16
+    assert body["metadata"]["runtime"] == "mock"

@@ -82,6 +82,29 @@ class WorldNamespace(_Namespace):
         )
 
 
+class StateNamespace(_Namespace):
+    def predict(
+        self,
+        model: str,
+        observation: list[float],
+        actions: list[int | list[float]],
+        *,
+        seed: int = 0,
+        reset: bool = True,
+    ):
+        return self._client._request(
+            "POST",
+            "/v1/state/predict",
+            json={
+                "model": model,
+                "observation": observation,
+                "actions": actions,
+                "seed": seed,
+                "reset": reset,
+            },
+        )
+
+
 class Client:
     def __init__(
         self, base_url: str, *, timeout: float = 60.0, http_client: httpx.Client | None = None
@@ -90,6 +113,7 @@ class Client:
         self._http = http_client or httpx.Client(base_url=self.base_url, timeout=timeout)
         self.robot = RobotNamespace(self)
         self.world = WorldNamespace(self)
+        self.state = StateNamespace(self)
 
     def close(self) -> None:
         self._http.close()

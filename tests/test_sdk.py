@@ -53,3 +53,22 @@ def test_world_sdk_sends_generation_controls():
             guidance_scale=2.5,
             fps=12,
         )
+
+
+def test_state_sdk_sends_observation_and_action_sequence():
+    def handler(request: httpx.Request):
+        body = json.loads(request.content)
+        assert body["observation"] == [0.1, 0.2, 0.3, 0.4]
+        assert body["actions"] == [0, 1, 0]
+        return httpx.Response(
+            200,
+            json={"model": "dreamer_cartpole", "latent_states": [], "metadata": {}},
+        )
+
+    http_client = httpx.Client(base_url="http://test", transport=httpx.MockTransport(handler))
+    with Client("http://test", http_client=http_client) as client:
+        client.state.predict(
+            "dreamer_cartpole",
+            observation=[0.1, 0.2, 0.3, 0.4],
+            actions=[0, 1, 0],
+        )

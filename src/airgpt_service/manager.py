@@ -8,13 +8,16 @@ from pathlib import Path
 from .artifacts import ArtifactStore
 from .errors import ModelNotFoundError, ServiceBusyError, ServiceError
 from .registry import ModelRegistry, RegistryModel
-from .runtimes.mock import MockVLARuntime, MockWorldRuntime
+from .runtimes.mock import MockStateRuntime, MockVLARuntime, MockWorldRuntime
 from .runtimes.transformers_vla import TransformersVLARuntime
 from .runtimes.diffusion_world import LTXVideoRuntime
+from .runtimes.dreamer_state import DreamerV3StateRuntime
 from .schemas import (
     ModelInfo,
     RobotActionRequest,
     RobotActionResponse,
+    StatePredictRequest,
+    StatePredictResponse,
     WorldPredictRequest,
     WorldPredictResponse,
 )
@@ -75,15 +78,18 @@ class ModelManager:
             model.status = "loading"
             try:
                 if self.worker_mode == "mock":
-                    runtime = (
-                        MockVLARuntime(model.spec)
-                        if model.spec.type == "vla"
-                        else MockWorldRuntime(model.spec)
-                    )
+                    if model.spec.type == "vla":
+                        runtime = MockVLARuntime(model.spec)
+                    elif model.spec.type == "world":
+                        runtime = MockWorldRuntime(model.spec)
+                    else:
+                        runtime = MockStateRuntime(model.spec)
                 elif self.worker_mode == "real" and model.spec.adapter == "openvla":
                     runtime = TransformersVLARuntime(model.spec)
                 elif self.worker_mode == "real" and model.spec.adapter == "ltx_video":
                     runtime = LTXVideoRuntime(model.spec, self.artifacts)
+                elif self.worker_mode == "real" and model.spec.adapter == "dreamerv3_cartpole":
+                    runtime = DreamerV3StateRuntime(model.spec)
                 else:
                     raise ServiceError(
                         "runtime_unavailable",
@@ -145,5 +151,22 @@ class ModelManager:
                     )
                 self.load(request.model)
                 return model.runtime.predict_world(request)
+        finally:
+            self._inference_slots.release()
+
+    def predict_state(self, request: StatePredictRequest) -> StatePredictResponse:
+        if not self._inference_slots.acquire(blocking=False):
+            raise ServiceBusyError()
+        try:
+            with self._lock:
+                model = self.get_model(request.model)
+                if model.spec.type != "state_world":
+                    raise ServiceError(
+                        "model_type_mismatch",
+                        f"'{request.model}' is not a state-space world model",
+                        422,
+                    )
+                self.load(request.model)
+                return model.runtime.predict_state(request)
         finally:
             self._inference_slots.release()

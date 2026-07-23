@@ -7,6 +7,8 @@ from ..registry import RegistryModel
 from ..schemas import (
     RobotActionRequest,
     RobotActionResponse,
+    StatePredictRequest,
+    StatePredictResponse,
     WorldPredictRequest,
     WorldPredictResponse,
 )
@@ -68,5 +70,43 @@ class MockWorldRuntime:
                 "num_frames": request.num_frames,
                 "seed": request.seed,
                 "prompt": prompt,
+            },
+        )
+
+
+class MockStateRuntime:
+    def __init__(self, spec: RegistryModel):
+        self.spec = spec
+        self.device = spec.device
+        self.loaded = False
+
+    def load(self) -> None:
+        self.loaded = True
+
+    def unload(self) -> None:
+        self.loaded = False
+
+    def predict_state(self, request: StatePredictRequest) -> StatePredictResponse:
+        digest = hashlib.sha256(
+            repr((request.observation, request.actions, request.seed)).encode()
+        ).digest()
+        latent_dim = int(self.spec.metadata.get("latent_dim", 16))
+        states = []
+        for step in range(len(request.actions)):
+            state = [
+                round(((digest[(step + index) % len(digest)] / 255.0) * 2.0) - 1.0, 6)
+                for index in range(latent_dim)
+            ]
+            states.append(state)
+        return StatePredictResponse(
+            model=request.model,
+            latent_states=states,
+            predicted_rewards=[0.0] * len(states),
+            uncertainty=[0.0] * len(states),
+            metadata={
+                "runtime": "mock",
+                "task": self.spec.metadata.get("task"),
+                "horizon": len(states),
+                "latent_dim": latent_dim,
             },
         )

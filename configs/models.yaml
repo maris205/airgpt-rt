@@ -34,3 +34,19 @@ models:
       local_files_only: true
       local_path: .cache/models/ltx-video-0.9.5
       max_frames: 49
+  dreamer_cartpole:
+    type: state_world
+    backend: dreamerv3
+    adapter: dreamerv3_cartpole
+    model_id: danijar/dreamerv3@e3f02248693a79dc8b0ebd62c93683888ddaccfe
+    device: cpu
+    metadata:
+      runtime_ready: true
+      verified_runtime: jax
+      task: gym_CartPole-v1
+      config: debug
+      checkpoint_path: artifacts/dreamer/cartpole-debug
+      observation_dim: 4
+      action_count: 2
+      latent_dim: 16
+      trained_steps: 4983

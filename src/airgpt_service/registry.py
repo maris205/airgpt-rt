@@ -12,7 +12,7 @@ from .errors import ModelNotFoundError, ServiceError
 class RegistryModel(BaseModel):
     model_config = ConfigDict(extra="allow", protected_namespaces=())
 
-    type: str = Field(pattern="^(vla|world)$")
+    type: str = Field(pattern="^(vla|world|state_world)$")
     backend: str = Field(min_length=1)
     adapter: str = Field(min_length=1)
     model_id: str | None = None
