@@ -1,14 +1,17 @@
 models:
   openvla:
     type: vla
-    backend: mock
+    backend: transformers
     adapter: openvla
     model_id: openvla/openvla-7b
-    device: cpu
+    device: cuda:0
     metadata:
       action_dim: 7
-      runtime_ready: false
+      runtime_ready: true
       verified_runtime: transformers
+      attention: sdpa
+      local_files_only: true
+      unnorm_key: bridge_orig
   octo:
     type: vla
     backend: mock
@@ -28,4 +31,3 @@ models:
     metadata:
       runtime_ready: false
       verified_runtime: diffusers
-

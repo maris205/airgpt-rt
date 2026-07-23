@@ -31,6 +31,17 @@ class ModelsResponse(BaseModel):
 
 
 class RobotActionRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "model": "openvla",
+                "image": "iVBORw0KGgoAAAANSUhEUg...",
+                "instruction": "pick up the red cube",
+                "metadata": {},
+            }
+        }
+    )
+
     model: str = Field(min_length=1)
     image: str = Field(
         min_length=1, description="Base64 image payload, optionally data-URL prefixed"
@@ -47,6 +58,20 @@ class RobotActionResponse(BaseModel):
 
 
 class WorldPredictRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "model": "ltx_video",
+                "scene": "robot kitchen",
+                "action": "move the gripper toward the cup",
+                "num_frames": 9,
+                "width": 384,
+                "height": 256,
+                "seed": 0,
+            }
+        }
+    )
+
     model: str = Field(min_length=1)
     image: str | None = Field(default=None, description="Optional base64 conditioning image")
     scene: str | None = Field(default=None, max_length=2000)

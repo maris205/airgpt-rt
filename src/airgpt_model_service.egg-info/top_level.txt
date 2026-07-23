@@ -1,2 +1,0 @@
-airgpt_sdk
-airgpt_service

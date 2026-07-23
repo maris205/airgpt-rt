@@ -1,2 +1,0 @@
-[console_scripts]
-airgpt-server = airgpt_service.main:run

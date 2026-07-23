@@ -16,6 +16,8 @@ class Settings:
     worker_mode: str = "mock"
     log_level: str = "INFO"
     max_image_bytes: int = 10 * 1024 * 1024
+    inference_timeout_seconds: float = 120.0
+    max_concurrent_inference: int = 1
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -27,4 +29,10 @@ class Settings:
             worker_mode=os.getenv("AIRGPT_WORKER_MODE", "mock"),
             log_level=os.getenv("AIRGPT_LOG_LEVEL", "INFO"),
             max_image_bytes=int(os.getenv("AIRGPT_MAX_IMAGE_BYTES", str(cls.max_image_bytes))),
+            inference_timeout_seconds=float(
+                os.getenv("AIRGPT_INFERENCE_TIMEOUT_SECONDS", str(cls.inference_timeout_seconds))
+            ),
+            max_concurrent_inference=int(
+                os.getenv("AIRGPT_MAX_CONCURRENT_INFERENCE", str(cls.max_concurrent_inference))
+            ),
         )

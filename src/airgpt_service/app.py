@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import asyncio
 import logging
 import uuid
 from contextlib import asynccontextmanager
@@ -10,9 +11,10 @@ from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from .config import Settings
-from .errors import InvalidInputError, ServiceError
+from .errors import InferenceTimeoutError, InvalidInputError, ServiceError
 from .manager import ModelManager
 from .registry import ModelRegistry
 from .schemas import (
@@ -56,7 +58,12 @@ def _serializable_validation_errors(errors: list[dict]) -> list[dict]:
 def create_app(settings: Settings | None = None, manager: ModelManager | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     if manager is None:
-        manager = ModelManager(ModelRegistry(settings.model_config_path), settings.worker_mode)
+        manager = ModelManager(
+            ModelRegistry(settings.model_config_path),
+            settings.worker_mode,
+            settings.max_concurrent_inference,
+        )
+    logging.basicConfig(level=settings.log_level.upper())
     logger = logging.getLogger("airgpt.service")
 
     @asynccontextmanager
@@ -116,16 +123,22 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
 
     @app.post("/v1/models/{model_name}/load", response_model=LoadResponse)
     async def load_model(model_name: str):
-        return LoadResponse(model=manager.load(model_name))
+        return LoadResponse(model=await run_in_threadpool(manager.load, model_name))
 
     @app.post("/v1/models/{model_name}/unload", response_model=LoadResponse)
     async def unload_model(model_name: str):
-        return LoadResponse(model=manager.unload(model_name))
+        return LoadResponse(model=await run_in_threadpool(manager.unload, model_name))
 
     @app.post("/v1/robot/action", response_model=RobotActionResponse)
     async def robot_action(request: RobotActionRequest):
         _validate_image(request.image, settings.max_image_bytes)
-        return manager.predict_action(request)
+        try:
+            return await asyncio.wait_for(
+                run_in_threadpool(manager.predict_action, request),
+                timeout=settings.inference_timeout_seconds,
+            )
+        except asyncio.TimeoutError as exc:
+            raise InferenceTimeoutError(settings.inference_timeout_seconds) from exc
 
     @app.post("/v1/world/predict", response_model=WorldPredictResponse)
     async def world_predict(request: WorldPredictRequest):
@@ -133,6 +146,12 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
             _validate_image(request.image, settings.max_image_bytes)
         if not any((request.image, request.scene, request.action, request.prompt)):
             raise InvalidInputError("world prediction requires image, scene, action, or prompt")
-        return manager.predict_world(request)
+        try:
+            return await asyncio.wait_for(
+                run_in_threadpool(manager.predict_world, request),
+                timeout=settings.inference_timeout_seconds,
+            )
+        except asyncio.TimeoutError as exc:
+            raise InferenceTimeoutError(settings.inference_timeout_seconds) from exc
 
     return app

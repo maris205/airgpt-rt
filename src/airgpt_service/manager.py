@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from threading import RLock
+from threading import BoundedSemaphore, RLock
 from typing import Any
 
-from .errors import ModelNotFoundError, ServiceError
+from .errors import ModelNotFoundError, ServiceBusyError, ServiceError
 from .registry import ModelRegistry, RegistryModel
 from .runtimes.mock import MockVLARuntime, MockWorldRuntime
+from .runtimes.transformers_vla import TransformersVLARuntime
 from .schemas import (
     ModelInfo,
     RobotActionRequest,
@@ -39,11 +40,14 @@ class ManagedModel:
 
 
 class ModelManager:
-    def __init__(self, registry: ModelRegistry, worker_mode: str = "mock"):
+    def __init__(
+        self, registry: ModelRegistry, worker_mode: str = "mock", max_concurrent_inference: int = 1
+    ):
         self.registry = registry
         self.worker_mode = worker_mode
         self._models = {name: ManagedModel(name, spec) for name, spec in registry.items()}
         self._lock = RLock()
+        self._inference_slots = BoundedSemaphore(max_concurrent_inference)
 
     def list_models(self) -> list[ModelInfo]:
         with self._lock:
@@ -62,23 +66,27 @@ class ModelManager:
                 return model.info()
             model.status = "loading"
             try:
-                if self.worker_mode != "mock":
+                if self.worker_mode == "mock":
+                    runtime = (
+                        MockVLARuntime(model.spec)
+                        if model.spec.type == "vla"
+                        else MockWorldRuntime(model.spec)
+                    )
+                elif self.worker_mode == "real" and model.spec.adapter == "openvla":
+                    runtime = TransformersVLARuntime(model.spec)
+                else:
                     raise ServiceError(
                         "runtime_unavailable",
-                        f"worker mode '{self.worker_mode}' is not implemented",
+                        f"no '{self.worker_mode}' runtime is available for '{name}'",
                         503,
                     )
-                runtime = (
-                    MockVLARuntime(model.spec)
-                    if model.spec.type == "vla"
-                    else MockWorldRuntime(model.spec)
-                )
                 runtime.load()
                 model.runtime = runtime
                 model.status = "ready"
                 model.error = None
-            except ServiceError:
+            except ServiceError as exc:
                 model.status = "failed"
+                model.error = exc.message
                 raise
             except Exception as exc:
                 model.status = "failed"
@@ -101,21 +109,31 @@ class ModelManager:
             return model.info()
 
     def predict_action(self, request: RobotActionRequest) -> RobotActionResponse:
-        with self._lock:
-            model = self.get_model(request.model)
-            if model.spec.type != "vla":
-                raise ServiceError(
-                    "model_type_mismatch", f"'{request.model}' is not a VLA model", 422
-                )
-            self.load(request.model)
-            return model.runtime.predict_action(request)
+        if not self._inference_slots.acquire(blocking=False):
+            raise ServiceBusyError()
+        try:
+            with self._lock:
+                model = self.get_model(request.model)
+                if model.spec.type != "vla":
+                    raise ServiceError(
+                        "model_type_mismatch", f"'{request.model}' is not a VLA model", 422
+                    )
+                self.load(request.model)
+                return model.runtime.predict_action(request)
+        finally:
+            self._inference_slots.release()
 
     def predict_world(self, request: WorldPredictRequest) -> WorldPredictResponse:
-        with self._lock:
-            model = self.get_model(request.model)
-            if model.spec.type != "world":
-                raise ServiceError(
-                    "model_type_mismatch", f"'{request.model}' is not a world model", 422
-                )
-            self.load(request.model)
-            return model.runtime.predict_world(request)
+        if not self._inference_slots.acquire(blocking=False):
+            raise ServiceBusyError()
+        try:
+            with self._lock:
+                model = self.get_model(request.model)
+                if model.spec.type != "world":
+                    raise ServiceError(
+                        "model_type_mismatch", f"'{request.model}' is not a world model", 422
+                    )
+                self.load(request.model)
+                return model.runtime.predict_world(request)
+        finally:
+            self._inference_slots.release()

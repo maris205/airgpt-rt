@@ -1,8 +1,7 @@
 # AirGPT Embodied AI Model Service
 
-Unified FastAPI service for VLA and world-model inference. The current M1 build uses
-deterministic mock runtimes to freeze the public API before connecting the GPU workers
-validated in M0.
+Unified FastAPI service for VLA and world-model inference. Mock mode covers the full
+public contract without GPU access. Real mode currently supports OpenVLA on CUDA.
 
 ## Start
 
@@ -12,6 +11,19 @@ python -m pip install -e '.[dev]'
 ```
 
 Open `http://127.0.0.1:8000/docs` for the generated API documentation.
+
+### OpenVLA GPU mode
+
+The `airgpt-openvla` Conda environment and model cache must exist first. In the current
+AutoDL workspace they were created and validated during M0.
+
+```bash
+./scripts/run_openvla.sh
+./scripts/smoke_openvla_api.sh
+```
+
+`configs/models.yaml` currently uses local-cache-only loading to make startup
+independent of Hugging Face connectivity.
 
 ## Test
 
@@ -48,11 +60,10 @@ with Client("http://127.0.0.1:8000") as client:
 
 ## Runtime Status
 
-- OpenVLA 7B: M0 GPU probe passed; production adapter pending M2.
+- OpenVLA 7B: production Transformers adapter and real GPU API passed M2.
 - Octo Small 1.5: M0 GPU probe passed; isolated JAX worker pending M4.
 - LTX-Video 0.9.5: M0 GPU probe passed; Diffusers worker pending M3.
 - Cosmos: adapter boundary reserved; checkpoint access is currently gated.
 
 AutoDL development uses native Conda environments. Docker artifacts will be validated
 on a host with Docker Engine and NVIDIA Container Toolkit.
-

@@ -1,5 +1,14 @@
 # AirGPT Model Service v1.0 Development Plan
 
+## Current status
+
+- M0 complete: OpenVLA, Octo Small 1.5, and LTX-Video 0.9.5 passed native GPU probes.
+- M1 complete: mock API, registry, lifecycle manager, SDK, OpenAPI, error contracts,
+  tests, native startup, and Git baseline are operational.
+- M2 complete: the OpenVLA Transformers adapter passed real SDK-to-API GPU inference,
+  repeated-request stability, and unload verification.
+- Next: M3, the LTX-Video world runtime with bounded artifact storage and cleanup.
+
 ## 1. Goal and delivery scope
 
 Build a single-node embodied-AI inference service with:
