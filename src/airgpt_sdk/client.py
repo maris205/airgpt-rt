@@ -52,6 +52,10 @@ class WorldNamespace(_Namespace):
         width: int = 384,
         height: int = 256,
         seed: int = 0,
+        negative_prompt: str = "blurry, jittery, distorted, camera movement",
+        num_inference_steps: int = 8,
+        guidance_scale: float = 3.0,
+        fps: int = 8,
     ):
         if isinstance(image, Path):
             image = image.read_bytes()
@@ -70,6 +74,10 @@ class WorldNamespace(_Namespace):
                 "width": width,
                 "height": height,
                 "seed": seed,
+                "negative_prompt": negative_prompt,
+                "num_inference_steps": num_inference_steps,
+                "guidance_scale": guidance_scale,
+                "fps": fps,
             },
         )
 

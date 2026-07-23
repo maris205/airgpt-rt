@@ -11,9 +11,11 @@ from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
 from .config import Settings
+from .artifacts import ArtifactStore
 from .errors import InferenceTimeoutError, InvalidInputError, ServiceError
 from .manager import ModelManager
 from .registry import ModelRegistry
@@ -58,17 +60,26 @@ def _serializable_validation_errors(errors: list[dict]) -> list[dict]:
 def create_app(settings: Settings | None = None, manager: ModelManager | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     if manager is None:
+        artifacts = ArtifactStore(
+            settings.artifact_dir,
+            ttl_seconds=settings.artifact_ttl_seconds,
+            max_runs=settings.max_artifact_runs,
+        )
         manager = ModelManager(
             ModelRegistry(settings.model_config_path),
             settings.worker_mode,
             settings.max_concurrent_inference,
+            artifacts,
         )
+    settings.artifact_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=settings.log_level.upper())
     logger = logging.getLogger("airgpt.service")
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         settings.artifact_dir.mkdir(parents=True, exist_ok=True)
+        if hasattr(manager, "artifacts"):
+            manager.artifacts.cleanup()
         logger.info("AirGPT service started with %d registered models", len(manager.list_models()))
         yield
         for model in manager.list_models():
@@ -76,6 +87,7 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
                 manager.unload(model.name)
 
     app = FastAPI(title="AirGPT Embodied AI Model Service", version="0.1.0", lifespan=lifespan)
+    app.mount("/artifacts", StaticFiles(directory=settings.artifact_dir), name="artifacts")
 
     @app.middleware("http")
     async def request_id_middleware(request: Request, call_next):

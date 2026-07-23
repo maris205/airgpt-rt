@@ -33,3 +33,23 @@ def test_sdk_raises_structured_error():
         client.load("missing")
     assert exc_info.value.status_code == 404
     client.close()
+
+
+def test_world_sdk_sends_generation_controls():
+    def handler(request: httpx.Request):
+        body = json.loads(request.content)
+        assert body["num_inference_steps"] == 6
+        assert body["guidance_scale"] == 2.5
+        assert body["fps"] == 12
+        return httpx.Response(200, json={"model": "ltx_video", "frames": [], "metadata": {}})
+
+    http_client = httpx.Client(base_url="http://test", transport=httpx.MockTransport(handler))
+    with Client("http://test", http_client=http_client) as client:
+        client.world.predict(
+            "ltx_video",
+            image=b"image",
+            action="move",
+            num_inference_steps=6,
+            guidance_scale=2.5,
+            fps=12,
+        )

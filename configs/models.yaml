@@ -24,10 +24,13 @@ models:
       verified_runtime: jax
   ltx_video:
     type: world
-    backend: mock
+    backend: diffusers
     adapter: ltx_video
     model_id: Lightricks/LTX-Video-0.9.5
-    device: cpu
+    device: cuda:0
     metadata:
-      runtime_ready: false
+      runtime_ready: true
       verified_runtime: diffusers
+      local_files_only: true
+      local_path: .cache/models/ltx-video-0.9.5
+      max_frames: 49

@@ -18,6 +18,8 @@ class Settings:
     max_image_bytes: int = 10 * 1024 * 1024
     inference_timeout_seconds: float = 120.0
     max_concurrent_inference: int = 1
+    artifact_ttl_seconds: int = 86_400
+    max_artifact_runs: int = 100
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -34,5 +36,11 @@ class Settings:
             ),
             max_concurrent_inference=int(
                 os.getenv("AIRGPT_MAX_CONCURRENT_INFERENCE", str(cls.max_concurrent_inference))
+            ),
+            artifact_ttl_seconds=int(
+                os.getenv("AIRGPT_ARTIFACT_TTL_SECONDS", str(cls.artifact_ttl_seconds))
+            ),
+            max_artifact_runs=int(
+                os.getenv("AIRGPT_MAX_ARTIFACT_RUNS", str(cls.max_artifact_runs))
             ),
         )

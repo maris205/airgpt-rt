@@ -7,7 +7,9 @@
   tests, native startup, and Git baseline are operational.
 - M2 complete: the OpenVLA Transformers adapter passed real SDK-to-API GPU inference,
   repeated-request stability, and unload verification.
-- Next: M3, the LTX-Video world runtime with bounded artifact storage and cleanup.
+- M3 complete: LTX-Video Diffusers runtime passed artifact-backed GPU API and video
+  decoding checks.
+- Next: M3.1/M4, a task-specific DreamerV3 state-space worker and Octo integration.
 
 ## 1. Goal and delivery scope
 
@@ -272,6 +274,24 @@ Exit criteria:
 - OpenVLA and Octo responses share an envelope but retain model-specific action
   metadata.
 - Simulator examples run against mock mode and are documented for real mode.
+
+### M3.1 - DreamerV3 state-space worker (2-3 working days, task-specific)
+
+Tasks:
+
+- Freeze one Gymnasium/robot observation and action contract with a reproducible
+  checkpoint and normalization metadata.
+- Add a separate `state_world` registry type and `/v1/state/predict` request/response
+  envelope for latent rollouts.
+- Keep the RSSM worker isolated from the Diffusers environment; expose optional decoded
+  observations only when the matching decoder is available.
+
+Exit criteria:
+
+- A known task produces deterministic latent rollouts from an observation and action
+  sequence, with shape, horizon, uncertainty, and checkpoint metadata returned.
+- The service does not imply that a task-specific Dreamer checkpoint is a universal
+  image-to-video world model.
 
 ### M5 - Deployment hardening and release (2 working days)
 

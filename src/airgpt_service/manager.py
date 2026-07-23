@@ -3,11 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from threading import BoundedSemaphore, RLock
 from typing import Any
+from pathlib import Path
 
+from .artifacts import ArtifactStore
 from .errors import ModelNotFoundError, ServiceBusyError, ServiceError
 from .registry import ModelRegistry, RegistryModel
 from .runtimes.mock import MockVLARuntime, MockWorldRuntime
 from .runtimes.transformers_vla import TransformersVLARuntime
+from .runtimes.diffusion_world import LTXVideoRuntime
 from .schemas import (
     ModelInfo,
     RobotActionRequest,
@@ -41,13 +44,18 @@ class ManagedModel:
 
 class ModelManager:
     def __init__(
-        self, registry: ModelRegistry, worker_mode: str = "mock", max_concurrent_inference: int = 1
+        self,
+        registry: ModelRegistry,
+        worker_mode: str = "mock",
+        max_concurrent_inference: int = 1,
+        artifact_store: ArtifactStore | None = None,
     ):
         self.registry = registry
         self.worker_mode = worker_mode
         self._models = {name: ManagedModel(name, spec) for name, spec in registry.items()}
         self._lock = RLock()
         self._inference_slots = BoundedSemaphore(max_concurrent_inference)
+        self.artifacts = artifact_store or ArtifactStore(Path("artifacts/runtime"))
 
     def list_models(self) -> list[ModelInfo]:
         with self._lock:
@@ -74,6 +82,8 @@ class ModelManager:
                     )
                 elif self.worker_mode == "real" and model.spec.adapter == "openvla":
                     runtime = TransformersVLARuntime(model.spec)
+                elif self.worker_mode == "real" and model.spec.adapter == "ltx_video":
+                    runtime = LTXVideoRuntime(model.spec, self.artifacts)
                 else:
                     raise ServiceError(
                         "runtime_unavailable",

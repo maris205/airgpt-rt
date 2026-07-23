@@ -36,6 +36,29 @@ def test_real_worker_mode_selects_openvla_runtime(monkeypatch):
     assert manager.get_model("openvla").runtime.loaded
 
 
+def test_real_worker_mode_selects_ltx_runtime(monkeypatch, tmp_path):
+    class FakeRuntime:
+        def __init__(self, spec, artifacts):
+            self.device = spec.device
+            self.artifacts = artifacts
+            self.loaded = False
+
+        def load(self):
+            self.loaded = True
+
+        def unload(self):
+            self.loaded = False
+
+    monkeypatch.setattr("airgpt_service.manager.LTXVideoRuntime", FakeRuntime)
+    from airgpt_service.artifacts import ArtifactStore
+
+    manager = ModelManager(
+        ModelRegistry(CONFIG), worker_mode="real", artifact_store=ArtifactStore(tmp_path)
+    )
+    assert manager.load("ltx_video").status == "ready"
+    assert manager.get_model("ltx_video").runtime.loaded
+
+
 def test_load_and_unload_are_idempotent():
     manager = ModelManager(ModelRegistry(CONFIG))
     first = manager.load("octo")

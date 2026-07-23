@@ -62,6 +62,7 @@ class WorldPredictRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "model": "ltx_video",
+                "image": "iVBORw0KGgoAAAANSUhEUg...",
                 "scene": "robot kitchen",
                 "action": "move the gripper toward the cup",
                 "num_frames": 9,
@@ -81,6 +82,12 @@ class WorldPredictRequest(BaseModel):
     width: int = Field(default=384, ge=64, le=2048)
     height: int = Field(default=256, ge=64, le=2048)
     seed: int = Field(default=0, ge=0, le=2**31 - 1)
+    negative_prompt: str = Field(
+        default="blurry, jittery, distorted, camera movement", max_length=2000
+    )
+    num_inference_steps: int = Field(default=8, ge=1, le=50)
+    guidance_scale: float = Field(default=3.0, ge=0.0, le=20.0)
+    fps: int = Field(default=8, ge=1, le=60)
 
     @field_validator("width", "height")
     @classmethod
