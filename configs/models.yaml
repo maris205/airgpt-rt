@@ -14,14 +14,20 @@ models:
       unnorm_key: bridge_orig
   octo:
     type: vla
-    backend: mock
+    backend: octo_jax
     adapter: octo
     model_id: rail-berkeley/octo-small-1.5
-    device: cpu
+    device: cuda:0
     metadata:
       action_dim: 7
-      runtime_ready: false
+      action_chunk_horizon: 4
+      dataset: bridge_dataset
+      image_size: 256
+      local_files_only: true
+      local_path: .cache/models/octo-small-1.5
+      runtime_ready: true
       verified_runtime: jax
+      model_revision: 241fb3514b7c40957a86d869fecb7c7fc353f540
   ltx_video:
     type: world
     backend: diffusers

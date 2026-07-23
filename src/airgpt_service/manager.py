@@ -9,6 +9,7 @@ from .artifacts import ArtifactStore
 from .errors import ModelNotFoundError, ServiceBusyError, ServiceError
 from .registry import ModelRegistry, RegistryModel
 from .runtimes.mock import MockStateRuntime, MockVLARuntime, MockWorldRuntime
+from .runtimes.octo_jax import OctoJaxRuntime
 from .runtimes.transformers_vla import TransformersVLARuntime
 from .runtimes.diffusion_world import LTXVideoRuntime
 from .runtimes.dreamer_state import DreamerV3StateRuntime
@@ -86,6 +87,8 @@ class ModelManager:
                         runtime = MockStateRuntime(model.spec)
                 elif self.worker_mode == "real" and model.spec.adapter == "openvla":
                     runtime = TransformersVLARuntime(model.spec)
+                elif self.worker_mode == "real" and model.spec.adapter == "octo":
+                    runtime = OctoJaxRuntime(model.spec)
                 elif self.worker_mode == "real" and model.spec.adapter == "ltx_video":
                     runtime = LTXVideoRuntime(model.spec, self.artifacts)
                 elif self.worker_mode == "real" and model.spec.adapter == "dreamerv3_cartpole":

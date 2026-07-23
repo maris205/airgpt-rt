@@ -11,7 +11,9 @@
   decoding checks.
 - M3.1 complete: task-specific DreamerV3 CartPole state-space worker passed real
   SDK/API rollout with a pinned checkpoint and reproducible Gym 0.26 patch.
-- Next: M4, Octo integration and simulator examples.
+- M4 complete: isolated Octo/JAX worker, typed SDK improvements, model examples, and
+  Isaac Sim/AirSim coordinate-mapping clients passed real API and contract tests.
+- Next: M5, deployment hardening and release validation.
 
 ## 1. Goal and delivery scope
 
@@ -259,6 +261,9 @@ Exit criteria:
 - Generated artifacts are bounded and automatically cleaned up.
 
 ### M4 - Octo, SDK, and simulator examples (2-3 working days, GPU for Octo)
+
+Status: **complete**. The implementation and measured exit criteria are documented in
+[`docs/M4_OCTO_AND_SIMULATORS.md`](docs/M4_OCTO_AND_SIMULATORS.md).
 
 Tasks:
 

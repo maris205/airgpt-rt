@@ -2,8 +2,8 @@
 
 Unified FastAPI service for VLA, image/video world-model, and task-specific state-space
 inference. Mock mode covers the full public contract without GPU access. Real mode
-supports OpenVLA and LTX-Video on CUDA plus a DreamerV3 CartPole worker in an isolated
-CPU JAX environment.
+supports OpenVLA, Octo, and LTX-Video on CUDA plus a DreamerV3 CartPole worker in an
+isolated CPU JAX environment.
 
 ## Start
 
@@ -39,6 +39,20 @@ Run the world worker on port `8001` so it can coexist with the OpenVLA worker:
 The response contains `/artifacts/...` URLs for individual frames and the generated
 MP4. The default artifact directory is `artifacts/runtime-world`.
 
+### Octo GPU mode
+
+Run the isolated Octo/JAX worker on port `8003`:
+
+```bash
+./scripts/setup_octo.sh
+./scripts/run_octo.sh
+./scripts/smoke_octo_api.sh
+```
+
+Octo returns a common 7-DoF action plus its native action chunk in metadata. See
+[`docs/M4_OCTO_AND_SIMULATORS.md`](docs/M4_OCTO_AND_SIMULATORS.md) for normalization,
+cache, and simulator frame assumptions.
+
 ### DreamerV3 state-space mode
 
 Set up the pinned official source and run the CartPole state worker on port `8002`:
@@ -56,7 +70,7 @@ contract and the task-specific checkpoint limitation.
 
 ```bash
 pytest
-ruff check src tests
+ruff check src tests examples
 ```
 
 ## API
@@ -89,7 +103,7 @@ with Client("http://127.0.0.1:8000") as client:
 ## Runtime Status
 
 - OpenVLA 7B: production Transformers adapter and real GPU API passed M2.
-- Octo Small 1.5: M0 GPU probe passed; isolated JAX worker pending M4.
+- Octo Small 1.5: isolated JAX worker and real API action-chunk smoke passed M4.
 - LTX-Video 0.9.5: Diffusers runtime and artifact-backed GPU API passed M3.
 - Cosmos: adapter boundary reserved; checkpoint access is currently gated.
 - DreamerV3 CartPole: M3.1 state-space worker passed real SDK/API rollout; see

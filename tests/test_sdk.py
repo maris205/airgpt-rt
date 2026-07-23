@@ -4,7 +4,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from airgpt_sdk import AirGPTError, Client
+from airgpt_sdk import AirGPTModelNotFoundError, Client, encode_image
 
 
 def test_sdk_encodes_image_and_exposes_namespaces(tmp_path: Path):
@@ -29,10 +29,32 @@ def test_sdk_raises_structured_error():
 
     http_client = httpx.Client(base_url="http://test", transport=httpx.MockTransport(handler))
     client = Client("http://test", http_client=http_client)
-    with pytest.raises(AirGPTError) as exc_info:
+    with pytest.raises(AirGPTModelNotFoundError) as exc_info:
         client.load("missing")
     assert exc_info.value.status_code == 404
+    assert exc_info.value.code == "model_not_found"
     client.close()
+
+
+def test_sdk_retries_safe_model_operations_only():
+    attempts = 0
+
+    def handler(_request: httpx.Request):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return httpx.Response(503, json={"code": "service_busy", "message": "busy"})
+        return httpx.Response(200, json={"models": []})
+
+    http_client = httpx.Client(base_url="http://test", transport=httpx.MockTransport(handler))
+    with Client("http://test", retries=1, retry_backoff=0, http_client=http_client) as client:
+        assert client.models() == {"models": []}
+    assert attempts == 2
+
+
+def test_encode_image_accepts_bytes_and_preserves_base64():
+    assert encode_image(b"image") == "aW1hZ2U="
+    assert encode_image("already-encoded") == "already-encoded"
 
 
 def test_world_sdk_sends_generation_controls():
