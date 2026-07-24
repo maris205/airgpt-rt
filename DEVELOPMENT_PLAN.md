@@ -15,8 +15,9 @@
   Isaac Sim/AirSim coordinate-mapping clients passed real API and contract tests.
 - M5 implementation complete: vLLM-style single-model CLI, local Web console, model
   lifecycle and inference testing, per-runtime Docker images, Compose profiles, and
-  release documentation passed mock end-to-end and deployment-file validation. Docker
-  Engine is unavailable in AutoDL, so clean NVIDIA-host acceptance remains pending.
+  release documentation passed mock end-to-end, deployment-file validation, and
+  single-model real-runtime regression for OpenVLA, Octo, LTX-Video, and DreamerV3.
+  Docker Engine is unavailable in AutoDL, so clean NVIDIA-host acceptance remains pending.
 - Next: v1 release candidate validation on a clean Docker/NVIDIA host and tagged release.
 
 ## 1. Goal and delivery scope

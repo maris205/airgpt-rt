@@ -33,6 +33,28 @@ def test_app_can_expose_one_selected_model(tmp_path: Path):
     assert [model["name"] for model in models] == ["octo"]
 
 
+def test_preload_runs_through_threadpool(monkeypatch, tmp_path: Path):
+    calls = []
+
+    async def fake_run_in_threadpool(func, *args, **kwargs):
+        calls.append(func.__name__)
+        return func(*args, **kwargs)
+
+    monkeypatch.setattr("airgpt_service.app.run_in_threadpool", fake_run_in_threadpool)
+    config = Path(__file__).resolve().parents[1] / "configs" / "models.yaml"
+    settings = Settings(
+        model_config_path=config,
+        selected_model="octo",
+        preload_model=True,
+        worker_mode="mock",
+        artifact_dir=tmp_path / "artifacts",
+    )
+    with TestClient(create_app(settings=settings)) as selected_client:
+        model = selected_client.get("/v1/models/octo").json()
+    assert model["loaded"] is True
+    assert "load" in calls
+
+
 def test_health_and_registered_models(client):
     assert client.get("/health/live").json() == {"status": "ok"}
     ready = client.get("/health/ready")

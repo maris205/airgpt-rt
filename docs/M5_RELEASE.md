@@ -65,6 +65,22 @@ Each profile is isolated, has a `/health/live` check, mounts model caches and ar
 and never bakes model weights into the image. Do not start multiple GPU profiles on one
 32G card unless the measured memory budget has been checked for that combination.
 
+## AutoDL release-candidate validation
+
+On 2026-07-24, the single-model CLI preloaded and passed the live API smoke test for all
+four v1 runtimes on the AutoDL host:
+
+| Model | Runtime device | Result |
+|---|---|---|
+| OpenVLA 7B | NVIDIA vGPU-32GB | deterministic 7D action, pass |
+| Octo Small 1.5 | NVIDIA vGPU-32GB | deterministic action chunk, pass |
+| LTX-Video 0.9.5 | NVIDIA vGPU-32GB | 9-frame artifact and MP4, pass |
+| DreamerV3 CartPole | CPU | 5-step latent and decoded rollout, pass |
+
+The runtimes were started sequentially to preserve predictable GPU ownership. Startup
+preloading runs through Starlette's worker threadpool because the pinned Octo/Orbax stack
+uses `nest_asyncio`, which cannot patch Uvicorn's `uvloop` event loop directly.
+
 ## Release boundary
 
 M5 does not include authentication, remote scheduling, Kubernetes, or the future AirGPT

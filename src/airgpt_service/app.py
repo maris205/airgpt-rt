@@ -97,7 +97,7 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
         logger.info("AirGPT service started with %d registered models", len(manager.list_models()))
         if settings.preload_model:
             for model in manager.list_models():
-                manager.load(model.name)
+                await run_in_threadpool(manager.load, model.name)
         yield
         for model in manager.list_models():
             if model.loaded:
