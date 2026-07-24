@@ -17,6 +17,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+hub = [
+  "huggingface-hub>=0.20,<1",
+]
 dev = [
   "pytest>=8,<10",
   "pytest-asyncio>=0.23,<1",
@@ -31,7 +34,7 @@ airgpt-server = "airgpt_service.main:run"
 where = ["src"]
 
 [tool.setuptools.package-data]
-airgpt_service = ["ui/*"]
+airgpt_service = ["hub_catalog/*", "ui/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-24T11:00:00Z",
+  "models": [
+    {
+      "slug": "openvla-7b",
+      "display_name": "OpenVLA 7B",
+      "summary": "A 7B vision-language-action model for language-conditioned robot manipulation.",
+      "task": "vla",
+      "tags": ["robotics", "manipulation", "transformers", "bridge-7dof"],
+      "source": {
+        "provider": "huggingface",
+        "repo_id": "openvla/openvla-7b",
+        "revision": "47a0ec7fc4ec123775a391911046cf33cf9ed83f",
+        "gated": false,
+        "license": "mit",
+        "license_url": "https://huggingface.co/openvla/openvla-7b"
+      },
+      "runtime": {
+        "registry_model": "openvla",
+        "backend": "transformers",
+        "adapter": "openvla",
+        "device": "cuda:0",
+        "dtype": "bfloat16"
+      },
+      "hardware": {
+        "minimum_vram_gb": 24,
+        "recommended_vram_gb": 32,
+        "notes": "Validated in BF16 on the AutoDL NVIDIA vGPU-32GB profile."
+      },
+      "verification": {
+        "status": "verified",
+        "tested_at": "2026-07-24",
+        "airgpt_version": "0.1.0",
+        "device": "NVIDIA vGPU-32GB",
+        "checks": ["load", "deterministic action", "unload"]
+      }
+    },
+    {
+      "slug": "octo-small-1.5",
+      "display_name": "Octo Small 1.5",
+      "summary": "A compact generalist robot policy with language conditioning and action chunking.",
+      "task": "vla",
+      "tags": ["robotics", "manipulation", "jax", "action-chunking"],
+      "source": {
+        "provider": "huggingface",
+        "repo_id": "rail-berkeley/octo-small-1.5",
+        "revision": "dc9aa3019f764726c770814b27e4ab0fc6e32a58",
+        "gated": false,
+        "license": "mit",
+        "license_url": "https://huggingface.co/rail-berkeley/octo-small-1.5"
+      },
+      "runtime": {
+        "registry_model": "octo",
+        "backend": "octo_jax",
+        "adapter": "octo",
+        "device": "cuda:0",
+        "dtype": null
+      },
+      "hardware": {
+        "minimum_vram_gb": 8,
+        "recommended_vram_gb": 12,
+        "notes": "Disable JAX preallocation when sharing a development host."
+      },
+      "verification": {
+        "status": "verified",
+        "tested_at": "2026-07-24",
+        "airgpt_version": "0.1.0",
+        "device": "NVIDIA vGPU-32GB",
+        "checks": ["load", "deterministic action chunk", "unload"]
+      }
+    },
+    {
+      "slug": "ltx-video-0.9.5",
+      "display_name": "LTX-Video 0.9.5",
+      "summary": "A Diffusers video model used by AirGPT for action-conditioned visual prediction.",
+      "task": "world",
+      "tags": ["world-model", "image-to-video", "diffusers", "visual-prediction"],
+      "source": {
+        "provider": "huggingface",
+        "repo_id": "Lightricks/LTX-Video-0.9.5",
+        "revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "gated": false,
+        "license": "other",
+        "license_url": "https://huggingface.co/Lightricks/LTX-Video-0.9.5"
+      },
+      "runtime": {
+        "registry_model": "ltx_video",
+        "backend": "diffusers",
+        "adapter": "ltx_video",
+        "device": "cuda:0",
+        "dtype": "bfloat16"
+      },
+      "hardware": {
+        "minimum_vram_gb": 24,
+        "recommended_vram_gb": 32,
+        "notes": "Validated with CPU offload at 384x256 and 9 frames."
+      },
+      "verification": {
+        "status": "verified",
+        "tested_at": "2026-07-24",
+        "airgpt_version": "0.1.0",
+        "device": "NVIDIA vGPU-32GB",
+        "checks": ["load", "9-frame prediction", "MP4 artifact", "unload"]
+      }
+    }
+  ]
+}

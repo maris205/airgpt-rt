@@ -1,0 +1,279 @@
+{
+  "$defs": {
+    "HubHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_vram_gb": {
+          "minimum": 0,
+          "title": "Minimum Vram Gb",
+          "type": "integer"
+        },
+        "recommended_vram_gb": {
+          "minimum": 0,
+          "title": "Recommended Vram Gb",
+          "type": "integer"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        }
+      },
+      "required": [
+        "minimum_vram_gb",
+        "recommended_vram_gb"
+      ],
+      "title": "HubHardware",
+      "type": "object"
+    },
+    "HubModel": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Slug",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "task": {
+          "enum": [
+            "vla",
+            "world",
+            "state_world"
+          ],
+          "title": "Task",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "source": {
+          "$ref": "#/$defs/HubSource"
+        },
+        "runtime": {
+          "$ref": "#/$defs/HubRuntime"
+        },
+        "hardware": {
+          "$ref": "#/$defs/HubHardware"
+        },
+        "verification": {
+          "$ref": "#/$defs/HubVerification"
+        }
+      },
+      "required": [
+        "slug",
+        "display_name",
+        "summary",
+        "task",
+        "source",
+        "runtime",
+        "hardware",
+        "verification"
+      ],
+      "title": "HubModel",
+      "type": "object"
+    },
+    "HubRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "registry_model": {
+          "title": "Registry Model",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "adapter": {
+          "title": "Adapter",
+          "type": "string"
+        },
+        "device": {
+          "default": "cuda:0",
+          "title": "Device",
+          "type": "string"
+        },
+        "dtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dtype"
+        }
+      },
+      "required": [
+        "registry_model",
+        "backend",
+        "adapter"
+      ],
+      "title": "HubRuntime",
+      "type": "object"
+    },
+    "HubSource": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "const": "huggingface",
+          "default": "huggingface",
+          "enum": [
+            "huggingface"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "repo_id": {
+          "pattern": "^[^/]+/[^/]+$",
+          "title": "Repo Id",
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 7,
+          "title": "Revision",
+          "type": "string"
+        },
+        "gated": {
+          "default": false,
+          "title": "Gated",
+          "type": "boolean"
+        },
+        "license": {
+          "title": "License",
+          "type": "string"
+        },
+        "license_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Url"
+        }
+      },
+      "required": [
+        "repo_id",
+        "revision",
+        "license"
+      ],
+      "title": "HubSource",
+      "type": "object"
+    },
+    "HubVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "verified",
+            "community",
+            "unverified"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "tested_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tested At"
+        },
+        "airgpt_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Airgpt Version"
+        },
+        "device": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device"
+        },
+        "checks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Checks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "HubVerification",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "enum": [
+        1
+      ],
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "generated_at": {
+      "title": "Generated At",
+      "type": "string"
+    },
+    "models": {
+      "items": {
+        "$ref": "#/$defs/HubModel"
+      },
+      "title": "Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "models"
+  ],
+  "title": "HubCatalog",
+  "type": "object"
+}

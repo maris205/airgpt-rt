@@ -29,6 +29,20 @@ airgpt serve --model openvla --port 8000
 Use `--lazy` to defer model loading until the first request. See
 [`docs/M5_RELEASE.md`](docs/M5_RELEASE.md) for local console and Docker profiles.
 
+### AirGPT Hub catalog
+
+Search the embodied-model catalog and inspect a pinned manifest:
+
+```bash
+airgpt hub search robot --verified-only
+airgpt hub info openvla-7b
+airgpt pull octo-small-1.5 --dry-run
+```
+
+Install the optional download dependency with `python -m pip install -e '.[hub]'`, then
+run `airgpt pull MODEL`. The command downloads the pinned Hugging Face revision and prints
+the matching `airgpt serve` command. See [`docs/HUB_H0.md`](docs/HUB_H0.md).
+
 ### OpenVLA GPU mode
 
 The `airgpt-openvla` Conda environment and model cache must exist first. In the current
