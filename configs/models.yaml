@@ -11,6 +11,7 @@ models:
       verified_runtime: transformers
       attention: sdpa
       local_files_only: true
+      trust_remote_code: true
       unnorm_key: bridge_orig
   octo:
     type: vla

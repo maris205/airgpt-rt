@@ -6,11 +6,12 @@ import asyncio
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
@@ -30,6 +31,9 @@ from .schemas import (
     WorldPredictRequest,
     WorldPredictResponse,
 )
+
+
+UI_DIR = Path(__file__).with_name("ui")
 
 
 def _validate_image(value: str, max_bytes: int) -> None:
@@ -68,7 +72,15 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
             max_runs=settings.max_artifact_runs,
         )
         manager = ModelManager(
-            ModelRegistry(settings.model_config_path),
+            ModelRegistry(
+                settings.model_config_path,
+                selected_model=settings.selected_model,
+                model_path=settings.model_path_override,
+                revision=settings.revision_override,
+                device=settings.device_override,
+                dtype=settings.dtype_override,
+                trust_remote_code=settings.trust_remote_code,
+            ),
             settings.worker_mode,
             settings.max_concurrent_inference,
             artifacts,
@@ -83,6 +95,9 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
         if hasattr(manager, "artifacts"):
             manager.artifacts.cleanup()
         logger.info("AirGPT service started with %d registered models", len(manager.list_models()))
+        if settings.preload_model:
+            for model in manager.list_models():
+                manager.load(model.name)
         yield
         for model in manager.list_models():
             if model.loaded:
@@ -90,6 +105,11 @@ def create_app(settings: Settings | None = None, manager: ModelManager | None = 
 
     app = FastAPI(title="AirGPT Embodied AI Model Service", version="0.1.0", lifespan=lifespan)
     app.mount("/artifacts", StaticFiles(directory=settings.artifact_dir), name="artifacts")
+    app.mount("/ui", StaticFiles(directory=UI_DIR, html=True), name="ui")
+
+    @app.get("/", include_in_schema=False)
+    async def index():
+        return RedirectResponse(url="/ui/")
 
     @app.middleware("http")
     async def request_id_middleware(request: Request, call_next):

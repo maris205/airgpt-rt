@@ -30,23 +30,43 @@ class TransformersVLARuntime:
             from transformers import AutoModelForVision2Seq, AutoProcessor
 
             self._torch = torch
-            dtype = torch.bfloat16 if self.device.startswith("cuda") else torch.float32
+            dtype_name = str(
+                self.spec.metadata.get(
+                    "dtype", "bfloat16" if self.device.startswith("cuda") else "float32"
+                )
+            )
+            dtype_map = {
+                "float16": torch.float16,
+                "bfloat16": torch.bfloat16,
+                "float32": torch.float32,
+            }
+            if dtype_name not in dtype_map:
+                raise ServiceError(
+                    "model_load_failed",
+                    f"unsupported OpenVLA dtype '{dtype_name}'",
+                    503,
+                )
+            dtype = dtype_map[dtype_name]
             self._dtype = dtype
             model_id = self.spec.model_id
             if not model_id:
                 raise ServiceError("model_load_failed", "OpenVLA model_id is required", 503)
             local_files_only = bool(self.spec.metadata.get("local_files_only", False))
+            trust_remote_code = bool(self.spec.metadata.get("trust_remote_code", False))
+            revision = self.spec.metadata.get("revision")
             self.processor = AutoProcessor.from_pretrained(
                 model_id,
-                trust_remote_code=True,
+                revision=revision,
+                trust_remote_code=trust_remote_code,
                 local_files_only=local_files_only,
             )
             self.model = AutoModelForVision2Seq.from_pretrained(
                 model_id,
+                revision=revision,
                 attn_implementation=str(self.spec.metadata.get("attention", "sdpa")),
                 torch_dtype=dtype,
                 low_cpu_mem_usage=True,
-                trust_remote_code=True,
+                trust_remote_code=trust_remote_code,
                 local_files_only=local_files_only,
             ).to(self.device)
             self.model.eval()

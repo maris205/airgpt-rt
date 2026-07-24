@@ -12,6 +12,13 @@ DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "models.yaml"
 @dataclass(frozen=True)
 class Settings:
     model_config_path: Path = DEFAULT_CONFIG_PATH
+    selected_model: str | None = None
+    model_path_override: str | None = None
+    revision_override: str | None = None
+    device_override: str | None = None
+    dtype_override: str | None = None
+    trust_remote_code: bool = False
+    preload_model: bool = False
     artifact_dir: Path = PROJECT_ROOT / "artifacts" / "runtime"
     worker_mode: str = "mock"
     log_level: str = "INFO"
@@ -27,6 +34,15 @@ class Settings:
         artifact_dir = Path(os.getenv("AIRGPT_ARTIFACT_DIR", str(cls.artifact_dir)))
         return cls(
             model_config_path=config_path,
+            selected_model=os.getenv("AIRGPT_MODEL") or None,
+            model_path_override=os.getenv("AIRGPT_MODEL_PATH") or None,
+            revision_override=os.getenv("AIRGPT_REVISION") or None,
+            device_override=os.getenv("AIRGPT_DEVICE") or None,
+            dtype_override=os.getenv("AIRGPT_DTYPE") or None,
+            trust_remote_code=os.getenv("AIRGPT_TRUST_REMOTE_CODE", "false").lower()
+            in {"1", "true", "yes", "on"},
+            preload_model=os.getenv("AIRGPT_PRELOAD_MODEL", "false").lower()
+            in {"1", "true", "yes", "on"},
             artifact_dir=artifact_dir,
             worker_mode=os.getenv("AIRGPT_WORKER_MODE", "mock"),
             log_level=os.getenv("AIRGPT_LOG_LEVEL", "INFO"),

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AirGPT RT Console</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">A</span>
+        <div>
+          <strong>AirGPT RT</strong>
+          <span>Local Runtime</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="serviceState" class="service-state"><i></i> Connecting</span>
+        <a href="/docs" target="_blank" rel="noreferrer">API Docs</a>
+      </div>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar">
+        <section class="sidebar-section">
+          <div class="section-heading">
+            <h2>Model</h2>
+            <button id="refreshModels" class="icon-button" title="Refresh model status" aria-label="Refresh model status">↻</button>
+          </div>
+          <label for="modelSelect">Runtime model</label>
+          <select id="modelSelect"></select>
+        </section>
+
+        <dl id="modelFacts" class="model-facts">
+          <div><dt>Status</dt><dd id="modelStatus">-</dd></div>
+          <div><dt>Backend</dt><dd id="modelBackend">-</dd></div>
+          <div><dt>Device</dt><dd id="modelDevice">-</dd></div>
+          <div><dt>Model ID</dt><dd id="modelId">-</dd></div>
+        </dl>
+
+        <div class="model-actions">
+          <button id="loadModel" class="primary-button">Load</button>
+          <button id="unloadModel" class="secondary-button">Unload</button>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <div class="workspace-header">
+          <div>
+            <span id="modelType" class="eyebrow">Runtime</span>
+            <h1 id="workspaceTitle">Inference</h1>
+          </div>
+          <span id="requestStatus" class="request-status">Idle</span>
+        </div>
+
+        <nav class="mode-tabs" aria-label="Inference mode">
+          <button data-mode="vla" class="active">Robot Action</button>
+          <button data-mode="world">World Prediction</button>
+          <button data-mode="state_world">State Rollout</button>
+        </nav>
+
+        <div class="work-grid">
+          <section class="input-pane">
+            <form id="vlaForm" class="test-form" data-panel="vla">
+              <div class="field">
+                <label for="vlaImage">Observation image</label>
+                <input id="vlaImage" type="file" accept="image/*" required />
+              </div>
+              <div class="field">
+                <label for="instruction">Instruction</label>
+                <textarea id="instruction" rows="4" required>pick up the fork</textarea>
+              </div>
+              <div class="field compact-field">
+                <label for="vlaSeed">Seed</label>
+                <input id="vlaSeed" type="number" min="0" value="0" />
+              </div>
+              <button type="submit" class="run-button">Run Action</button>
+            </form>
+
+            <form id="worldForm" class="test-form hidden" data-panel="world">
+              <div class="field">
+                <label for="worldImage">Conditioning image</label>
+                <input id="worldImage" type="file" accept="image/*" required />
+              </div>
+              <div class="field">
+                <label for="worldAction">Action</label>
+                <textarea id="worldAction" rows="3" required>move the gripper toward the fork</textarea>
+              </div>
+              <div class="control-grid">
+                <div class="field"><label for="frameCount">Frames</label><input id="frameCount" type="number" min="1" max="49" value="9" /></div>
+                <div class="field"><label for="worldWidth">Width</label><input id="worldWidth" type="number" min="64" step="8" value="384" /></div>
+                <div class="field"><label for="worldHeight">Height</label><input id="worldHeight" type="number" min="64" step="8" value="256" /></div>
+                <div class="field"><label for="worldSteps">Steps</label><input id="worldSteps" type="number" min="1" max="50" value="8" /></div>
+              </div>
+              <button type="submit" class="run-button">Generate</button>
+            </form>
+
+            <form id="stateForm" class="test-form hidden" data-panel="state_world">
+              <div class="field">
+                <label for="observation">Observation JSON</label>
+                <textarea id="observation" rows="4">[0.01, 0.02, 0.03, 0.04]</textarea>
+              </div>
+              <div class="field">
+                <label for="actions">Actions JSON</label>
+                <textarea id="actions" rows="4">[0, 1, 0, 1, 0]</textarea>
+              </div>
+              <div class="field compact-field">
+                <label for="stateSeed">Seed</label>
+                <input id="stateSeed" type="number" min="0" value="0" />
+              </div>
+              <button type="submit" class="run-button">Run Rollout</button>
+            </form>
+          </section>
+
+          <section class="result-pane">
+            <div id="preview" class="preview empty-preview">
+              <span>Result preview</span>
+            </div>
+            <div class="response-heading">
+              <h2>Response</h2>
+              <button id="copyResponse" class="text-button">Copy JSON</button>
+            </div>
+            <pre id="responseOutput">{}</pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/ui/app.js" defer></script>
+  </body>
+</html>

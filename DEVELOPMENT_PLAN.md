@@ -13,7 +13,11 @@
   SDK/API rollout with a pinned checkpoint and reproducible Gym 0.26 patch.
 - M4 complete: isolated Octo/JAX worker, typed SDK improvements, model examples, and
   Isaac Sim/AirSim coordinate-mapping clients passed real API and contract tests.
-- Next: M5, deployment hardening and release validation.
+- M5 implementation complete: vLLM-style single-model CLI, local Web console, model
+  lifecycle and inference testing, per-runtime Docker images, Compose profiles, and
+  release documentation passed mock end-to-end and deployment-file validation. Docker
+  Engine is unavailable in AutoDL, so clean NVIDIA-host acceptance remains pending.
+- Next: v1 release candidate validation on a clean Docker/NVIDIA host and tagged release.
 
 ## 1. Goal and delivery scope
 
@@ -304,6 +308,10 @@ Exit criteria:
   image-to-video world model.
 
 ### M5 - Deployment hardening and release (2 working days)
+
+Status: **implementation complete; external Docker acceptance pending**. The CLI, local
+console, deployment profiles, operational guidance, and validation commands are
+documented in [`docs/M5_RELEASE.md`](docs/M5_RELEASE.md).
 
 Tasks:
 

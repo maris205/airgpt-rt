@@ -14,6 +14,21 @@ python -m pip install -e '.[dev]'
 
 Open `http://127.0.0.1:8000/docs` for the generated API documentation.
 
+Open `http://127.0.0.1:8000/ui/` for the local runtime console.
+
+### Single-model CLI
+
+The v1 launcher starts one isolated runtime process, similar to the operational UX of
+vLLM:
+
+```bash
+airgpt models list
+airgpt serve --model openvla --port 8000
+```
+
+Use `--lazy` to defer model loading until the first request. See
+[`docs/M5_RELEASE.md`](docs/M5_RELEASE.md) for local console and Docker profiles.
+
 ### OpenVLA GPU mode
 
 The `airgpt-openvla` Conda environment and model cache must exist first. In the current

@@ -1,0 +1,8 @@
+.cache/
+.git/
+.pytest_cache/
+.ruff_cache/
+artifacts/
+*.egg-info/
+__pycache__/
+*.pyc

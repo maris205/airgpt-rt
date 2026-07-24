@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends git patch && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements/dreamer.txt /tmp/dreamer.txt
+RUN python -m pip install -r /tmp/dreamer.txt && \
+    git clone https://github.com/danijar/dreamerv3.git /opt/dreamerv3 && \
+    git -C /opt/dreamerv3 checkout --detach e3f02248693a79dc8b0ebd62c93683888ddaccfe
+COPY patches/dreamerv3-gym026.patch /tmp/dreamerv3-gym026.patch
+RUN git -C /opt/dreamerv3 apply /tmp/dreamerv3-gym026.patch
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY configs ./configs
+RUN python -m pip install .
+
+ENV AIRGPT_MODEL_CONFIG=/app/configs/models.yaml \
+    AIRGPT_ARTIFACT_DIR=/app/artifacts/runtime-dreamer \
+    PYTHONPATH=/opt/dreamerv3 \
+    OMP_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1
+
+EXPOSE 8002
+HEALTHCHECK --interval=20s --timeout=5s --start-period=45s --retries=5 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/health/live', timeout=3)" || exit 1
+CMD ["airgpt", "serve", "--model", "dreamer_cartpole", "--host", "0.0.0.0", "--port", "8002"]

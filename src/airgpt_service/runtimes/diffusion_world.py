@@ -42,9 +42,22 @@ class LTXVideoRuntime:
             from diffusers import LTXImageToVideoPipeline
 
             self._torch = torch
+            dtype_name = str(self.spec.metadata.get("dtype", "bfloat16"))
+            dtype_map = {
+                "float16": torch.float16,
+                "bfloat16": torch.bfloat16,
+                "float32": torch.float32,
+            }
+            if dtype_name not in dtype_map:
+                raise ServiceError(
+                    "model_load_failed",
+                    f"unsupported LTX-Video dtype '{dtype_name}'",
+                    503,
+                )
             self.pipe = LTXImageToVideoPipeline.from_pretrained(
                 self._model_ref(),
-                torch_dtype=torch.bfloat16,
+                revision=self.spec.metadata.get("revision"),
+                torch_dtype=dtype_map[dtype_name],
                 local_files_only=bool(self.spec.metadata.get("local_files_only", False)),
             )
             self.pipe.enable_model_cpu_offload()

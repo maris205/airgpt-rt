@@ -1,0 +1,93 @@
+services:
+  console:
+    profiles: [console]
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    ports: ["7860:8000"]
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./artifacts:/app/artifacts
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+  openvla:
+    profiles: [openvla]
+    build:
+      context: .
+      dockerfile: Dockerfile.openvla
+    ports: ["8000:8000"]
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./.cache/huggingface-openvla:/app/.cache/huggingface-openvla
+      - ./artifacts:/app/artifacts
+    shm_size: 8gb
+    restart: unless-stopped
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  world:
+    profiles: [world]
+    build:
+      context: .
+      dockerfile: Dockerfile.world
+    ports: ["8001:8001"]
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./.cache/models:/app/.cache/models
+      - ./.cache/huggingface-world:/app/.cache/huggingface-world
+      - ./artifacts:/app/artifacts
+    shm_size: 8gb
+    restart: unless-stopped
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  dreamer:
+    profiles: [dreamer]
+    build:
+      context: .
+      dockerfile: Dockerfile.dreamer
+    ports: ["8002:8002"]
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./artifacts:/app/artifacts
+    restart: unless-stopped
+    stop_grace_period: 20s
+
+  octo:
+    profiles: [octo]
+    build:
+      context: .
+      dockerfile: Dockerfile.octo
+    ports: ["8003:8003"]
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./.cache/models:/app/.cache/models
+      - ./.cache/huggingface-octo:/app/.cache/huggingface-octo
+      - ./artifacts:/app/artifacts
+    shm_size: 8gb
+    restart: unless-stopped
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

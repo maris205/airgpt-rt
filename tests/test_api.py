@@ -1,7 +1,36 @@
 import base64
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from airgpt_service import create_app
+from airgpt_service.config import Settings
 
 
 IMAGE = base64.b64encode(b"mock-image-bytes").decode("ascii")
+
+
+def test_local_web_console_is_served(client):
+    root = client.get("/", follow_redirects=False)
+    assert root.status_code == 307
+    assert root.headers["location"] == "/ui/"
+    page = client.get("/ui/")
+    assert page.status_code == 200
+    assert "AirGPT RT" in page.text
+    assert client.get("/ui/app.js").status_code == 200
+
+
+def test_app_can_expose_one_selected_model(tmp_path: Path):
+    config = Path(__file__).resolve().parents[1] / "configs" / "models.yaml"
+    settings = Settings(
+        model_config_path=config,
+        selected_model="octo",
+        worker_mode="mock",
+        artifact_dir=tmp_path / "artifacts",
+    )
+    with TestClient(create_app(settings=settings)) as selected_client:
+        models = selected_client.get("/v1/models").json()["models"]
+    assert [model["name"] for model in models] == ["octo"]
 
 
 def test_health_and_registered_models(client):
