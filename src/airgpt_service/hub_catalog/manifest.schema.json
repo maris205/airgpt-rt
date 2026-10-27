@@ -136,10 +136,10 @@
       "additionalProperties": false,
       "properties": {
         "provider": {
-          "const": "huggingface",
-          "default": "huggingface",
+          "const": "modelscope",
+          "default": "modelscope",
           "enum": [
-            "huggingface"
+            "modelscope"
           ],
           "title": "Provider",
           "type": "string"

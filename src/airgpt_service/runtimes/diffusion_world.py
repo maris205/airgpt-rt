@@ -25,14 +25,20 @@ class LTXVideoRuntime:
         self.loaded = False
 
     def _model_ref(self) -> str:
-        model_id = self.spec.model_id
-        if not model_id:
-            raise ServiceError("model_load_failed", "LTX-Video model_id is required", 503)
-        configured_path = str(self.spec.metadata.get("local_path", model_id))
+        configured_path = self.spec.metadata.get("local_path") or self.spec.model_id
+        if not configured_path:
+            raise ServiceError("model_load_failed", "LTX-Video model path is required", 503)
+        configured_path = str(configured_path)
         path = Path(configured_path)
-        if not path.is_absolute() and configured_path.startswith(".cache/"):
+        if not path.is_absolute():
             path = Path(__file__).resolve().parents[3] / path
-        return str(path) if path.exists() else model_id
+        if not path.exists():
+            raise ServiceError(
+                "model_load_failed",
+                f"LTX-Video checkpoint is missing: {path}. Download it with `airgpt pull ltx-video-0.9.5 --local-dir {path}`.",
+                503,
+            )
+        return str(path)
 
     def load(self) -> None:
         if self.loaded:
@@ -56,7 +62,6 @@ class LTXVideoRuntime:
                 )
             self.pipe = LTXImageToVideoPipeline.from_pretrained(
                 self._model_ref(),
-                revision=self.spec.metadata.get("revision"),
                 torch_dtype=dtype_map[dtype_name],
                 local_files_only=bool(self.spec.metadata.get("local_files_only", False)),
             )

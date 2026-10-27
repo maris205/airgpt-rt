@@ -7,9 +7,12 @@ cd "${project_root}"
 env_name="${AIRGPT_OCTO_ENV:-airgpt-octo}"
 repo_dir="${AIRGPT_OCTO_REPO:-${project_root}/.cache/repos/octo}"
 model_dir="${AIRGPT_OCTO_MODEL_DIR:-${project_root}/.cache/models/octo-small-1.5}"
-hf_home="${HF_HOME:-${project_root}/.cache/huggingface-octo}"
+tokenizer_dir="${AIRGPT_OCTO_TOKENIZER_DIR:-${project_root}/.cache/models/t5-base}"
+modelscope_cache="${MODELSCOPE_CACHE:-${project_root}/.cache/modelscope-octo}"
 commit="241fb3514b7c40957a86d869fecb7c7fc353f540"
 repo_url="https://github.com/octo-models/octo.git"
+model_revision="d8dc05826aa4086e0b7e88b11bcef9bce75534ad"
+tokenizer_revision="f0469cad324cc448c2ef576a030f357b496eea5a"
 
 mkdir -p "$(dirname "${repo_dir}")"
 if [[ ! -d "${repo_dir}/.git" ]]; then
@@ -38,29 +41,56 @@ conda run --no-capture-output -n "${env_name}" python -m pip install \
 conda run --no-capture-output -n "${env_name}" python -m pip install -e "${project_root}"
 
 if [[ ! -f "${model_dir}/config.json" ]]; then
-  mkdir -p "${model_dir}" "${hf_home}"
-  HF_HOME="${hf_home}" conda run --no-capture-output -n "${env_name}" \
-    python - "${model_dir}" <<'PY'
+  mkdir -p "${model_dir}" "${modelscope_cache}"
+  MODELSCOPE_CACHE="${modelscope_cache}" conda run --no-capture-output -n "${env_name}" \
+    python - "${model_dir}" "${model_revision}" <<'PY'
 import sys
 
-from huggingface_hub import snapshot_download
+from modelscope_hub import HubApi
 
-snapshot_download(
-    "rail-berkeley/octo-small-1.5",
+HubApi().download_repo(
+    "mariswang/octo-small-1.5",
+    "model",
+    revision=sys.argv[2],
     local_dir=sys.argv[1],
-    local_dir_use_symlinks=False,
 )
 PY
 fi
 
-HF_HOME="${hf_home}" conda run --no-capture-output -n "${env_name}" python - <<'PY'
-from transformers import AutoTokenizer
+if [[ ! -f "${tokenizer_dir}/config.json" ]]; then
+  mkdir -p "${tokenizer_dir}" "${modelscope_cache}"
+  MODELSCOPE_CACHE="${modelscope_cache}" conda run --no-capture-output -n "${env_name}" \
+    python - "${tokenizer_dir}" "${tokenizer_revision}" <<'PY'
+import sys
 
-AutoTokenizer.from_pretrained("t5-base")
+from modelscope_hub import HubApi
+
+HubApi().download_repo(
+    "AI-ModelScope/t5-base",
+    "model",
+    revision=sys.argv[2],
+    local_dir=sys.argv[1],
+)
+PY
+fi
+
+conda run --no-capture-output -n "${env_name}" \
+  python - "${model_dir}/config.json" "${tokenizer_dir}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config_path = Path(sys.argv[1])
+tokenizer_dir = sys.argv[2]
+config = json.loads(config_path.read_text(encoding="utf-8"))
+config["text_processor"]["kwargs"]["tokenizer_name"] = tokenizer_dir
+config["model"]["task_tokenizers"]["language"]["kwargs"]["encoder"] = tokenizer_dir
+config_path.write_text(json.dumps(config), encoding="utf-8")
 PY
 
 echo "Octo source: ${repo_dir}"
 echo "Octo commit: $(git -C "${repo_dir}" rev-parse HEAD)"
 echo "Octo checkpoint: ${model_dir}"
-echo "Hugging Face cache: ${hf_home}"
+echo "T5 tokenizer: ${tokenizer_dir}"
+echo "ModelScope cache: ${modelscope_cache}"
 echo "Environment: ${env_name}"

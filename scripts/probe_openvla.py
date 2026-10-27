@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw
 from transformers import AutoModelForVision2Seq, AutoProcessor
 
 
-DEFAULT_MODEL = "openvla/openvla-7b"
+DEFAULT_MODEL = str(Path(__file__).resolve().parents[1] / ".cache/models/openvla-7b")
 DEFAULT_INSTRUCTION = "pick up the red cube"
 
 

@@ -35,7 +35,7 @@ vLLM
 +
 Ollama
 +
-HuggingFace Inference Endpoint
+ModelScope model hosting
 
 for Embodied AI
 ```

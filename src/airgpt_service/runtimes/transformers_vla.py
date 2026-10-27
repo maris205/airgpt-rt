@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gc
+from pathlib import Path
 from typing import Any
 
 from ..adapters.vla.openvla import OpenVLAAdapter
@@ -21,6 +22,21 @@ class TransformersVLARuntime:
         self._torch: Any | None = None
         self._dtype: Any | None = None
         self.loaded = False
+
+    def _model_ref(self) -> str:
+        configured = self.spec.metadata.get("local_path") or self.spec.model_id
+        if not configured:
+            raise ServiceError("model_load_failed", "OpenVLA model path is required", 503)
+        path = Path(str(configured))
+        if not path.is_absolute():
+            path = Path(__file__).resolve().parents[3] / path
+        if not path.exists():
+            raise ServiceError(
+                "model_load_failed",
+                f"OpenVLA checkpoint is missing: {path}. Download it with `airgpt pull openvla-7b --local-dir {path}`.",
+                503,
+            )
+        return str(path)
 
     def load(self) -> None:
         if self.loaded:
@@ -48,21 +64,16 @@ class TransformersVLARuntime:
                 )
             dtype = dtype_map[dtype_name]
             self._dtype = dtype
-            model_id = self.spec.model_id
-            if not model_id:
-                raise ServiceError("model_load_failed", "OpenVLA model_id is required", 503)
+            model_ref = self._model_ref()
             local_files_only = bool(self.spec.metadata.get("local_files_only", False))
             trust_remote_code = bool(self.spec.metadata.get("trust_remote_code", False))
-            revision = self.spec.metadata.get("revision")
             self.processor = AutoProcessor.from_pretrained(
-                model_id,
-                revision=revision,
+                model_ref,
                 trust_remote_code=trust_remote_code,
                 local_files_only=local_files_only,
             )
             self.model = AutoModelForVision2Seq.from_pretrained(
-                model_id,
-                revision=revision,
+                model_ref,
                 attn_implementation=str(self.spec.metadata.get("attention", "sdpa")),
                 torch_dtype=dtype,
                 low_cpu_mem_usage=True,

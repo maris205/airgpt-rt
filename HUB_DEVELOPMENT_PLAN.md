@@ -2,8 +2,8 @@
 
 ## Product boundary
 
-AirGPT Hub is an independent vertical model product for embodied AI. Hugging Face is the
-upstream repository, download, revision, and organization layer. AirGPT adds curation,
+AirGPT Hub is an independent vertical model product for embodied AI. ModelScope is the
+repository, download, revision, and organization layer. AirGPT adds curation,
 runtime compatibility, hardware guidance, verification results, and one-command local
 deployment.
 
@@ -16,13 +16,13 @@ revisions and preserves the original license and gated-access requirements.
 
 Status: **complete**.
 
-- Public Dataset catalog: `airgpt/embodied-model-index`.
+- Public Dataset catalog: `mariswang/AirGPT-Embodied-Model-Index`.
 - Pydantic manifest contract and generated JSON Schema.
 - Verified OpenVLA, Octo, and LTX-Video entries with pinned revisions.
 - Offline catalog bundled with AirGPT Runtime.
 - `airgpt hub search`, `airgpt hub info`, and `airgpt pull`.
-- Hugging Face proxy, token, cache, revision, and local-path support.
-- Hugging Face API audit for pinned revision, gated-state, and license drift.
+- ModelScope token, cache, revision, and local-path support.
+- ModelScope API audit for pinned revision, gated-state, and license drift.
 - Catalog publisher for organization maintainers.
 
 ### H1 - Public Web MVP

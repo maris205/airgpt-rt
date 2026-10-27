@@ -10,7 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 DEFAULT_CATALOG_URL = (
-    "https://huggingface.co/datasets/airgpt/embodied-model-index/resolve/main/index.json"
+    "https://modelscope.cn/api/v1/datasets/mariswang/AirGPT-Embodied-Model-Index/repo"
+    "?Revision=master&FilePath=index.json"
 )
 BUNDLED_CATALOG = Path(__file__).with_name("hub_catalog") / "index.json"
 
@@ -22,7 +23,7 @@ class HubError(RuntimeError):
 class HubSource(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    provider: Literal["huggingface"] = "huggingface"
+    provider: Literal["modelscope"] = "modelscope"
     repo_id: str = Field(pattern=r"^[^/]+/[^/]+$")
     revision: str = Field(min_length=7)
     gated: bool = False
@@ -177,22 +178,22 @@ class HubClient:
     ) -> tuple[HubModel, Path]:
         model = self.get(slug)
         try:
-            from huggingface_hub import snapshot_download
+            from modelscope_hub import HubApi
         except ImportError as exc:
             raise HubError(
                 "model downloads require `pip install 'airgpt-model-service[hub]'`"
             ) from exc
         kwargs = {
             "repo_id": model.source.repo_id,
+            "repo_type": "model",
             "revision": revision or model.source.revision,
-            "token": os.getenv("HF_TOKEN") or None,
         }
         if cache_dir is not None:
             kwargs["cache_dir"] = str(cache_dir)
         if local_dir is not None:
             kwargs["local_dir"] = str(local_dir)
         try:
-            path = snapshot_download(**kwargs)
+            path = HubApi(token=os.getenv("MODELSCOPE_API_TOKEN") or None).download_repo(**kwargs)
         except Exception as exc:
             raise HubError(f"failed to download '{model.source.repo_id}': {exc}") from exc
         return model, Path(path)

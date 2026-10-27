@@ -1,5 +1,5 @@
 ---
-license: mit
+license: apache-2.0
 pretty_name: AirGPT Embodied Model Index
 task_categories:
   - robotics
@@ -11,7 +11,7 @@ tags:
 
 # AirGPT Embodied Model Index
 
-This dataset is the versioned catalog used by AirGPT Runtime and the future AirGPT Hub.
+This ModelScope dataset is the versioned catalog used by AirGPT Runtime and AirGPT Hub.
 It indexes upstream model repositories; it does not redistribute their weights.
 
 Every entry pins an upstream revision and records the runtime adapter, hardware guidance,

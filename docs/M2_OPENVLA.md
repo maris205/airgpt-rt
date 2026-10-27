@@ -3,7 +3,8 @@
 ## Implementation
 
 - Runtime: Transformers 4.40.1 and PyTorch 2.2.2+cu121 in `airgpt-openvla`.
-- Checkpoint: `openvla/openvla-7b`, loaded from the local Hugging Face cache.
+- Checkpoint: ModelScope `zixiaoBios/openvla-7b` at revision
+  `55052867e5bddbc2179026832791c3fd2a9d1dab`, loaded from the local checkpoint directory.
 - Device and dtype: CUDA 0, BF16.
 - Attention: SDPA.
 - Adapter prompt: OpenVLA native action prompt.

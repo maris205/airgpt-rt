@@ -40,13 +40,26 @@ airgpt pull octo-small-1.5 --dry-run
 ```
 
 Install the optional download dependency with `python -m pip install -e '.[hub]'`, then
-run `airgpt pull MODEL`. The command downloads the pinned Hugging Face revision and prints
+run `airgpt pull MODEL`. The command downloads the pinned ModelScope revision and prints
 the matching `airgpt serve` command. See [`docs/HUB_H0.md`](docs/HUB_H0.md).
+
+Populate the local paths used by the default runtime configuration before starting GPU
+workers:
+
+```bash
+airgpt pull openvla-7b --local-dir .cache/models/openvla-7b
+airgpt pull ltx-video-0.9.5 --local-dir .cache/models/ltx-video-0.9.5
+./scripts/setup_octo.sh
+```
+
+Runtime loaders only accept local checkpoint directories. Network downloads are handled
+by the ModelScope-backed `airgpt pull` command, so Transformers and Diffusers cannot fall
+back to another model host during startup.
 
 ### OpenVLA GPU mode
 
-The `airgpt-openvla` Conda environment and model cache must exist first. In the current
-AutoDL workspace they were created and validated during M0.
+The `airgpt-openvla` Conda environment and ModelScope-pulled checkpoint must exist first.
+In the current AutoDL workspace they were created and validated during M0.
 
 ```bash
 ./scripts/run_openvla.sh
@@ -54,7 +67,7 @@ AutoDL workspace they were created and validated during M0.
 ```
 
 `configs/models.yaml` currently uses local-cache-only loading to make startup
-independent of Hugging Face connectivity.
+independent of external model-host connectivity.
 
 ### LTX-Video GPU mode
 

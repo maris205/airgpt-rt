@@ -21,7 +21,7 @@ RUN python3 -m pip install --no-deps . && python3 -m pip install \
 
 ENV AIRGPT_MODEL_CONFIG=/app/configs/models.yaml \
     AIRGPT_ARTIFACT_DIR=/app/artifacts/runtime-openvla \
-    HF_HOME=/app/.cache/huggingface-openvla
+    MODELSCOPE_CACHE=/app/.cache/modelscope-openvla
 
 EXPOSE 8000
 HEALTHCHECK --interval=20s --timeout=5s --start-period=60s --retries=5 \

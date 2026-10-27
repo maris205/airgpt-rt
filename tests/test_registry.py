@@ -36,3 +36,13 @@ def test_registry_filters_and_overrides_selected_model(tmp_path: Path):
     assert spec.device == "cuda:1"
     assert spec.metadata["local_path"] == str(model_path)
     assert spec.metadata["dtype"] == "float16"
+
+
+def test_registry_openvla_model_path_overrides_default_local_path(tmp_path: Path):
+    path = Path(__file__).resolve().parents[1] / "configs" / "models.yaml"
+    model_path = tmp_path / "openvla"
+    registry = ModelRegistry(path, selected_model="openvla", model_path=str(model_path))
+    spec = registry.get("openvla")
+    assert spec.model_id == "zixiaoBios/openvla-7b"
+    assert spec.metadata["local_path"] == str(model_path)
+    assert spec.metadata["local_files_only"] is True

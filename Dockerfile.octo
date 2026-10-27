@@ -21,7 +21,7 @@ RUN python3 -m pip install .
 
 ENV AIRGPT_MODEL_CONFIG=/app/configs/models.yaml \
     AIRGPT_ARTIFACT_DIR=/app/artifacts/runtime-octo \
-    HF_HOME=/app/.cache/huggingface-octo \
+    MODELSCOPE_CACHE=/app/.cache/modelscope-octo \
     TRANSFORMERS_OFFLINE=1 \
     XLA_PYTHON_CLIENT_PREALLOCATE=false \
     TF_CPP_MIN_LOG_LEVEL=2

@@ -13,31 +13,33 @@ CATALOG_DIR = ROOT / "src" / "airgpt_service" / "hub_catalog"
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="publish the AirGPT Hub catalog")
-    parser.add_argument("--repo-id", default="airgpt/embodied-model-index")
+    parser.add_argument("--repo-id", default="mariswang/AirGPT-Embodied-Model-Index")
     parser.add_argument("--private", action="store_true")
     args = parser.parse_args()
 
-    token = os.getenv("HF_TOKEN")
+    token = os.getenv("MODELSCOPE_API_TOKEN")
     if not token:
-        parser.error("HF_TOKEN is required")
+        parser.error("MODELSCOPE_API_TOKEN is required")
 
     HubCatalog.model_validate_json((CATALOG_DIR / "index.json").read_text(encoding="utf-8"))
     try:
-        from huggingface_hub import HfApi
+        from modelscope_hub import HubApi
     except ImportError as exc:
-        raise SystemExit("install huggingface_hub before publishing") from exc
+        raise SystemExit("install modelscope-hub before publishing") from exc
 
-    api = HfApi(token=token)
-    api.create_repo(
-        repo_id=args.repo_id,
-        repo_type="dataset",
-        private=args.private,
-        exist_ok=True,
-    )
+    api = HubApi(token=token)
+    if not api.repo_exists(args.repo_id, "dataset"):
+        api.create_repo(
+            repo_id=args.repo_id,
+            repo_type="dataset",
+            visibility="private" if args.private else "public",
+            license="Apache License 2.0",
+            description="Versioned model catalog for AirGPT Runtime",
+        )
     result = api.upload_folder(
         repo_id=args.repo_id,
         repo_type="dataset",
-        folder_path=str(CATALOG_DIR),
+        folder_path=CATALOG_DIR,
         commit_message="Publish AirGPT Hub catalog v1",
     )
     print(result)

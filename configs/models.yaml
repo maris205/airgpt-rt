@@ -3,7 +3,7 @@ models:
     type: vla
     backend: transformers
     adapter: openvla
-    model_id: openvla/openvla-7b
+    model_id: zixiaoBios/openvla-7b
     device: cuda:0
     metadata:
       action_dim: 7
@@ -11,13 +11,15 @@ models:
       verified_runtime: transformers
       attention: sdpa
       local_files_only: true
+      local_path: .cache/models/openvla-7b
+      source_revision: 55052867e5bddbc2179026832791c3fd2a9d1dab
       trust_remote_code: true
       unnorm_key: bridge_orig
   octo:
     type: vla
     backend: octo_jax
     adapter: octo
-    model_id: rail-berkeley/octo-small-1.5
+    model_id: mariswang/octo-small-1.5
     device: cuda:0
     metadata:
       action_dim: 7
@@ -29,6 +31,7 @@ models:
       runtime_ready: true
       verified_runtime: jax
       model_revision: 241fb3514b7c40957a86d869fecb7c7fc353f540
+      source_revision: d8dc05826aa4086e0b7e88b11bcef9bce75534ad
   ltx_video:
     type: world
     backend: diffusers
@@ -40,6 +43,7 @@ models:
       verified_runtime: diffusers
       local_files_only: true
       local_path: .cache/models/ltx-video-0.9.5
+      source_revision: b5ef4c942966dab55d219c651dd3a8bd0826f55c
       max_frames: 49
   dreamer_cartpole:
     type: state_world

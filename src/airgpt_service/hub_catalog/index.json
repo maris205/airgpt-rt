@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-24T11:00:00Z",
+  "generated_at": "2026-10-26T13:00:00Z",
   "models": [
     {
       "slug": "openvla-7b",
@@ -9,12 +9,12 @@
       "task": "vla",
       "tags": ["robotics", "manipulation", "transformers", "bridge-7dof"],
       "source": {
-        "provider": "huggingface",
-        "repo_id": "openvla/openvla-7b",
-        "revision": "47a0ec7fc4ec123775a391911046cf33cf9ed83f",
+        "provider": "modelscope",
+        "repo_id": "zixiaoBios/openvla-7b",
+        "revision": "55052867e5bddbc2179026832791c3fd2a9d1dab",
         "gated": false,
         "license": "mit",
-        "license_url": "https://huggingface.co/openvla/openvla-7b"
+        "license_url": "https://modelscope.cn/models/zixiaoBios/openvla-7b"
       },
       "runtime": {
         "registry_model": "openvla",
@@ -43,12 +43,12 @@
       "task": "vla",
       "tags": ["robotics", "manipulation", "jax", "action-chunking"],
       "source": {
-        "provider": "huggingface",
-        "repo_id": "rail-berkeley/octo-small-1.5",
-        "revision": "dc9aa3019f764726c770814b27e4ab0fc6e32a58",
+        "provider": "modelscope",
+        "repo_id": "mariswang/octo-small-1.5",
+        "revision": "d8dc05826aa4086e0b7e88b11bcef9bce75534ad",
         "gated": false,
         "license": "mit",
-        "license_url": "https://huggingface.co/rail-berkeley/octo-small-1.5"
+        "license_url": "https://modelscope.cn/models/mariswang/octo-small-1.5"
       },
       "runtime": {
         "registry_model": "octo",
@@ -77,12 +77,12 @@
       "task": "world",
       "tags": ["world-model", "image-to-video", "diffusers", "visual-prediction"],
       "source": {
-        "provider": "huggingface",
+        "provider": "modelscope",
         "repo_id": "Lightricks/LTX-Video-0.9.5",
-        "revision": "e58e28c39631af4d1468ee57a853764e11c1d37e",
+        "revision": "b5ef4c942966dab55d219c651dd3a8bd0826f55c",
         "gated": false,
         "license": "other",
-        "license_url": "https://huggingface.co/Lightricks/LTX-Video-0.9.5"
+        "license_url": "https://modelscope.cn/models/Lightricks/LTX-Video-0.9.5"
       },
       "runtime": {
         "registry_model": "ltx_video",

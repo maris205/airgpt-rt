@@ -21,7 +21,7 @@ RUN python3 -m pip install --no-deps . && python3 -m pip install \
 
 ENV AIRGPT_MODEL_CONFIG=/app/configs/models.yaml \
     AIRGPT_ARTIFACT_DIR=/app/artifacts/runtime-world \
-    HF_HOME=/app/.cache/huggingface-world
+    MODELSCOPE_CACHE=/app/.cache/modelscope-world
 
 EXPOSE 8001
 HEALTHCHECK --interval=20s --timeout=5s --start-period=90s --retries=5 \

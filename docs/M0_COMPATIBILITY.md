@@ -13,9 +13,9 @@
 
 ## OpenVLA
 
-- Model: `openvla/openvla-7b`.
-- Hugging Face access: public and ungated.
-- Revision checked: `47a0ec7fc4ec123775a391911046cf33cf9ed83f`.
+- ModelScope model: `zixiaoBios/openvla-7b`.
+- ModelScope access: public and ungated.
+- Revision checked: `55052867e5bddbc2179026832791c3fd2a9d1dab`.
 - Checkpoint payload: approximately 14.05 GiB across three safetensor shards.
 - Environment: Conda `airgpt-openvla`, Python 3.10, PyTorch 2.2.2+cu121,
   Transformers 4.40.1, Timm 0.9.10.
@@ -62,13 +62,13 @@
 - Preferred product-aligned candidate:
   `nvidia/Cosmos-Predict2-2B-Sample-Action-Conditioned` or
   `nvidia/Cosmos-Predict2-2B-Video2World`.
-- Cosmos access is gated and the current environment has no usable Hugging Face token.
-  Model terms must be accepted and a read token supplied before it can be validated.
+- No verified ModelScope repository is currently selected for the Cosmos candidate, so
+  it is excluded from the ModelScope-only v1 catalog until one can be validated.
 - Public fallback: `Lightricks/LTX-Video-0.9.5`, a Diffusers image-to-video model with
   text conditioning. The repository payload is approximately 23.9 GiB and will require
   CPU/model offload for a stable 31.5 GiB inference path.
-- Selected v1 baseline: `Lightricks/LTX-Video-0.9.5`, revision
-  `e58e28c39631af4d1468ee57a853764e11c1d37e`.
+- Selected v1 baseline: ModelScope `Lightricks/LTX-Video-0.9.5`, revision
+  `b5ef4c942966dab55d219c651dd3a8bd0826f55c`.
 - Native image-to-video inference: passed using the BridgeV2 image and a robot action
   description as text conditioning.
 - Smoke configuration: BF16, sequential model CPU offload, VAE tiling, 384x256,
@@ -103,8 +103,8 @@
   generation metadata without hard-coding the LTX schema.
 - All three Conda environments pass `pip check`, all probe scripts compile, and the GPU
   returns to 3 MiB idle usage after the processes exit.
-- Disk remaining after environments and checkpoints: approximately 72 GiB. The
-  Hugging Face World/Xet cache contains about 10 GiB of reusable download chunks that
-  can be reclaimed later if disk pressure becomes important.
+- Disk remaining after environments and checkpoints: approximately 72 GiB. ModelScope
+  download caches can be reclaimed later if disk pressure becomes important; runtime
+  checkpoints live under `.cache/models`.
 - M0 compatibility and contract discovery is complete. Implementation can proceed to
   the CPU/mock service skeleton and normalized API schemas.

@@ -197,7 +197,7 @@ Tasks:
 - Run one upstream/native inference for each model before wrapping it in the service.
 - Measure model download size, peak VRAM, load time, inference latency, and output
   format.
-- Confirm model licenses, Hugging Face access requirements, and whether remote code is
+- Confirm model licenses, ModelScope access requirements, and whether remote code is
   required.
 - Select the v1 world model based on the actual GPU. Prefer the smallest model that
   produces a meaningful conditioned future-frame demo. Treat NVIDIA Cosmos as an
@@ -389,7 +389,7 @@ available.
   metadata; do not pretend all action spaces are identical.
 - **GPU OOM:** lazy loading, one model per worker, bounded concurrency, unload endpoint,
   low-resolution smoke settings.
-- **Disk pressure:** shared Hugging Face cache, artifact TTL, documented cache cleanup,
+- **Disk pressure:** shared ModelScope cache, artifact TTL, documented cache cleanup,
   no model weights in Git or images.
 - **Docker unavailable on AutoDL:** develop and test natively there; verify containers
   on a host with Docker Engine, NVIDIA Container Toolkit, and GPU access.

@@ -1,5 +1,7 @@
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 from airgpt_service.cli import main
 from airgpt_service.hub import BUNDLED_CATALOG, HubCatalog, HubClient, launch_command
@@ -83,14 +85,19 @@ def test_hub_cli_reports_missing_catalog(capsys, tmp_path: Path):
 def test_pull_uses_pinned_revision(monkeypatch, tmp_path: Path):
     captured = {}
 
-    def fake_snapshot_download(**kwargs):
-        captured.update(kwargs)
-        return str(tmp_path / "snapshot")
+    class FakeHubApi:
+        def __init__(self, *, token=None):
+            captured["token"] = token
 
-    monkeypatch.setattr("huggingface_hub.snapshot_download", fake_snapshot_download)
+        def download_repo(self, **kwargs):
+            captured.update(kwargs)
+            return tmp_path / "snapshot"
+
+    monkeypatch.setitem(sys.modules, "modelscope_hub", SimpleNamespace(HubApi=FakeHubApi))
     client = HubClient(catalog_file=BUNDLED_CATALOG)
     model, path = client.pull("openvla-7b", cache_dir=tmp_path / "cache")
-    assert captured["repo_id"] == "openvla/openvla-7b"
+    assert captured["repo_id"] == "zixiaoBios/openvla-7b"
+    assert captured["repo_type"] == "model"
     assert captured["revision"] == model.source.revision
     assert captured["cache_dir"] == str(tmp_path / "cache")
     assert path == tmp_path / "snapshot"

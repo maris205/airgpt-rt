@@ -8,7 +8,8 @@ robot-action contract from OpenVLA, Octo, and LTX-Video.
 The worker uses the official Octo source at commit
 `241fb3514b7c40957a86d869fecb7c7fc353f540` in the `airgpt-octo` environment. The
 checkpoint is local at `.cache/models/octo-small-1.5`; the language tokenizer cache is
-kept under `.cache/huggingface-octo` and offline loading is enabled by default.
+downloaded from ModelScope to `.cache/models/t5-base`, and offline loading is enabled by
+default.
 
 ```bash
 ./scripts/setup_octo.sh

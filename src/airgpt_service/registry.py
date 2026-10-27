@@ -68,9 +68,7 @@ class ModelRegistry:
             spec.metadata["trust_remote_code"] = True
         if not model_path:
             return
-        if spec.adapter == "openvla":
-            spec.model_id = model_path
-        elif spec.adapter in {"octo", "ltx_video"}:
+        if spec.adapter in {"openvla", "octo", "ltx_video"}:
             spec.metadata["local_path"] = model_path
             spec.metadata["local_files_only"] = True
         elif spec.adapter == "dreamerv3_cartpole":

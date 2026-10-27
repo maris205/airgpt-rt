@@ -18,7 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 hub = [
-  "huggingface-hub>=0.20,<1",
+  "modelscope-hub>=0.5,<1",
 ]
 dev = [
   "pytest>=8,<10",

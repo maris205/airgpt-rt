@@ -86,7 +86,7 @@ def _add_catalog_options(parser: argparse.ArgumentParser) -> None:
 def _serve(args: argparse.Namespace) -> int:
     ModelRegistry(args.config, selected_model=args.model)
     if args.cache_dir:
-        os.environ["HF_HOME"] = str(args.cache_dir)
+        os.environ["MODELSCOPE_CACHE"] = str(args.cache_dir)
     port = args.port or DEFAULT_PORTS.get(args.model, 8000)
     settings = Settings(
         model_config_path=args.config,

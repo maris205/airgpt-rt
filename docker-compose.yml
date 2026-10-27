@@ -23,7 +23,8 @@ services:
     ports: ["8000:8000"]
     volumes:
       - ./configs:/app/configs:ro
-      - ./.cache/huggingface-openvla:/app/.cache/huggingface-openvla
+      - ./.cache/models:/app/.cache/models
+      - ./.cache/modelscope-openvla:/app/.cache/modelscope-openvla
       - ./artifacts:/app/artifacts
     shm_size: 8gb
     restart: unless-stopped
@@ -45,7 +46,7 @@ services:
     volumes:
       - ./configs:/app/configs:ro
       - ./.cache/models:/app/.cache/models
-      - ./.cache/huggingface-world:/app/.cache/huggingface-world
+      - ./.cache/modelscope-world:/app/.cache/modelscope-world
       - ./artifacts:/app/artifacts
     shm_size: 8gb
     restart: unless-stopped
@@ -79,7 +80,7 @@ services:
     volumes:
       - ./configs:/app/configs:ro
       - ./.cache/models:/app/.cache/models
-      - ./.cache/huggingface-octo:/app/.cache/huggingface-octo
+      - ./.cache/modelscope-octo:/app/.cache/modelscope-octo
       - ./artifacts:/app/artifacts
     shm_size: 8gb
     restart: unless-stopped

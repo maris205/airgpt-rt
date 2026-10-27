@@ -25,21 +25,19 @@ class OctoJaxRuntime:
         self.model_path: str | None = None
 
     def _model_path(self) -> str:
-        configured = self.spec.metadata.get("local_path")
-        if configured:
-            path = Path(str(configured))
-            if not path.is_absolute():
-                path = Path(__file__).resolve().parents[3] / path
-            if path.exists():
-                return str(path)
-            if bool(self.spec.metadata.get("local_files_only", False)):
-                raise ServiceError(
-                    "model_load_failed", f"Octo local checkpoint is missing: {path}", 503
-                )
-        model_id = self.spec.model_id
-        if not model_id:
-            raise ServiceError("model_load_failed", "Octo model_id is required", 503)
-        return model_id if model_id.startswith("hf://") else f"hf://{model_id}"
+        configured = self.spec.metadata.get("local_path") or self.spec.model_id
+        if not configured:
+            raise ServiceError("model_load_failed", "Octo model path is required", 503)
+        path = Path(str(configured))
+        if not path.is_absolute():
+            path = Path(__file__).resolve().parents[3] / path
+        if not path.exists():
+            raise ServiceError(
+                "model_load_failed",
+                f"Octo checkpoint is missing: {path}. Download it with `airgpt pull octo-small-1.5 --local-dir {path}`.",
+                503,
+            )
+        return str(path)
 
     @staticmethod
     def _block_until_ready(jax: Any, tree: Any) -> Any:

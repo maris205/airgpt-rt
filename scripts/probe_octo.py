@@ -14,7 +14,6 @@ from typing import Any
 
 import flax
 import jax
-import jax.numpy as jnp
 import jaxlib
 import numpy as np
 import tensorflow as tf
@@ -26,7 +25,7 @@ tf.config.set_visible_devices([], "GPU")
 from octo.model.octo_model import OctoModel  # noqa: E402
 
 
-DEFAULT_MODEL = "hf://rail-berkeley/octo-small-1.5"
+DEFAULT_MODEL = str(Path(__file__).resolve().parents[1] / ".cache/models/octo-small-1.5")
 DEFAULT_INSTRUCTION = "pick up the fork"
 
 
